@@ -21,6 +21,7 @@ public class Vertex {
     }
     
 
+    @Override
     public String toString() {
         if (name != null) {
             return name;

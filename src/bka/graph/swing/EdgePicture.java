@@ -7,6 +7,7 @@ package bka.graph.swing;
 
 import bka.graph.*;
 import java.awt.*;
+import java.util.logging.*;
 
 
 public class EdgePicture extends AbstractPicture {
@@ -131,7 +132,7 @@ public class EdgePicture extends AbstractPicture {
     }
 
     
-    protected final void setOrigin(VertexPicture originPicture, Point point) {
+    public final void setOrigin(VertexPicture originPicture, Point point) {
         setOrigin(originPicture, originPicture.nearestAttachmentIndex(point));
     }
     
@@ -149,7 +150,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final void setTerminus(VertexPicture terminusPicture, Point point) {
+    public final void setTerminus(VertexPicture terminusPicture, Point point) {
         setTerminus(terminusPicture, terminusPicture.nearestAttachmentIndex(point));
     }
     
@@ -245,14 +246,15 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected Rectangle rectangle() {
-        Rectangle rectangle = super.rectangle();
-        rectangle.x -= 10;
-        rectangle.y -= 10;
-        rectangle.width += 20;
-        rectangle.height += 20;
-        return rectangle;
-    }
+//    @Override
+//    protected Rectangle rectangle() {
+//        Rectangle rectangle = super.rectangle();
+//        rectangle.x -= 10;
+//        rectangle.y -= 10;
+//        rectangle.width += 20;
+//        rectangle.height += 20;
+//        return rectangle;
+//    }
     
     
     protected final int yNorth() {
@@ -323,8 +325,8 @@ public class EdgePicture extends AbstractPicture {
             newEdge = (Edge) edgeClass().newInstance();
             newEdge.init(getOriginPicture().getVertex(), getTerminusPicture().getVertex());
         }
-        catch (Exception ex) {
-            ex.printStackTrace(System.err);
+        catch (ReflectiveOperationException ex) {
+            Logger.getLogger(EdgePicture.class.getName()).log(Level.SEVERE, "Cannot create edge", ex);
         }
         return newEdge;
     }

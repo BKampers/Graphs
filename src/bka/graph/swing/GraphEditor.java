@@ -10,20 +10,28 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import javax.swing.*;
 
 
 public class GraphEditor extends bka.swing.FrameApplication {
     
     
+    public interface Listener {
+        void vertexPictureAdded(VertexPicture vertexPicture);
+    }
+
+
     public GraphEditor() {
         initComponents();
+        addGraphButtons();
+        vertexTreePanel = new VertexTreePanel(this);
         diagramSplitPane.setLeftComponent(vertexTreePanel);
     }
-    
-    
+
+
     public Collection<Vertex> allVertices() {
-        Collection<Vertex> collection = new HashSet<Vertex>(); // HashSet avoids duplicates
+        Collection<Vertex> collection = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramComponent diagramComponent : getDiagramComponents()) {
             for (VertexPicture picture : diagramComponent.getVertexPictures()) {
                 collection.add(picture.getVertex());
@@ -34,7 +42,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
 
     public Collection<Vertex> allVertices(Class<? extends Vertex> vertexClass) {
-        Collection<Vertex> collection = new HashSet<Vertex>(); // HashSet avoids duplicates
+        Collection<Vertex> collection = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramComponent diagramComponent : getDiagramComponents()) {
             for (VertexPicture picture : diagramComponent.getVertexPictures()) {
                 Vertex vertex = picture.getVertex();
@@ -48,7 +56,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     public Collection<Edge> allEdges() {
-        Collection<Edge> collection = new HashSet<Edge>(); // HashSet avoids duplicates
+        Collection<Edge> collection = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramComponent diagramComponent : getDiagramComponents()) {
             for (EdgePicture picture : diagramComponent.getEdgePictures()) {
                 collection.add(picture.getEdge());
@@ -59,7 +67,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     
     public Collection<Edge> allEdges(Class<? extends Edge> edgeClass) {
-        Collection<Edge> collection = new HashSet<Edge>(); // HashSet avoids duplicates
+        Collection<Edge> collection = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramComponent diagramComponent : getDiagramComponents()) {
             for (EdgePicture  picture : diagramComponent.getEdgePictures()) {
                 Edge edge = picture.getEdge();
@@ -105,36 +113,49 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
 
+    @Override
     public String applicationName() {
         return "GraphEditor";
     }
 
 
+    @Override
     public String manufacturerName() {
         return "BartK";
     }
     
 
     public static void main(final String[] arguments) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                GraphEditor frame = new GraphEditor();
+        EventQueue.invokeLater(() -> {
+            GraphEditor frame = new GraphEditor();
 //                frame.initialize(arguments);
-                frame.addVertexButton("Vertex", VertexPicture.class);
-                frame.addEdgeButton("Edge", EdgePicture.class);
-                frame.setVisible(true);
-            }
+            frame.setVisible(true);
         });
     }
-    
-    
+
+
+    protected Map<String, Class<? extends VertexPicture>> getVertexButtons() {
+        HashMap<String, Class<? extends VertexPicture>> map = new HashMap<>();
+        map.put("Vertex", VertexPicture.class);
+        return map;
+    }
+
+
+    protected Map<String, Class<? extends EdgePicture>> getEdgeButtons() {
+        HashMap<String, Class<? extends EdgePicture>> map = new HashMap<>();
+        map.put("Edge", EdgePicture.class);
+        return map;
+    }
+
+
+    @Override
     protected void opened() {
         Object path = getProperty(DIAGRAM_FILE_PROPERTY);
         if (path != null) {
             diagramFile = new File(path.toString());
             load();
         }
-        if (diagramFile.isDirectory()) {
+        if (diagramFile != null && diagramFile.isDirectory()) {
             createEmptyBook();
         }
         else {
@@ -173,7 +194,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    protected void vetrexPictureAdded(VertexPicture vertexPicture) {
+    protected void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture vertexPicture) {
         vertexTreePanel.vertexAdded(vertexPicture, selectedDiagramComponent());
     }
     
@@ -189,6 +210,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
 
     protected void vertexPictureClicked(VertexPicture vertexPicture, int count) {
+    }
+
+
+    protected void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture edgePicture) {
     }
     
     
@@ -228,10 +253,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
     protected JPopupMenu getEdgeMenu(final EdgePicture picture) {
         JPopupMenu menu = new JPopupMenu();
         JMenuItem colorItem = new JMenuItem("Color");
-        colorItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                modifyColor(picture);
-            }
+        colorItem.addActionListener((ActionEvent evt) -> {
+            modifyColor(picture);
         });
         menu.add(colorItem);
         return menu;
@@ -244,7 +267,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
             xmlEncoder = new java.beans.XMLEncoder(new java.io.BufferedOutputStream(new java.io.FileOutputStream(diagramFile)));
         }
         catch (java.io.FileNotFoundException ex) {
-            ex.printStackTrace(System.err);
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.INFO, diagramFile.toString(), ex);
         }
         return xmlEncoder;
     }
@@ -275,7 +298,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     ArrayList<DiagramComponent> getDiagramComponents() {
-        ArrayList<DiagramComponent> components = new ArrayList<DiagramComponent>();
+        ArrayList<DiagramComponent> components = new ArrayList<>();
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
             components.add(diagramComponent(i));
@@ -364,6 +387,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
         diagramPopupMenu.add(deleteDiagramMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        pictureButtonPanel.setPreferredSize(new java.awt.Dimension(10, 80));
         getContentPane().add(pictureButtonPanel, java.awt.BorderLayout.NORTH);
 
         buttonPanel.setLayout(new javax.swing.BoxLayout(buttonPanel, javax.swing.BoxLayout.Y_AXIS));
@@ -432,6 +457,16 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }// </editor-fold>//GEN-END:initComponents
 
 
+    private void addGraphButtons() {
+        for (Map.Entry<String, Class<? extends VertexPicture>> entry : getVertexButtons().entrySet()) {
+            addVertexButton(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, Class<? extends EdgePicture>> entry : getEdgeButtons().entrySet()) {
+            addEdgeButton(entry.getKey(), entry.getValue());
+        }
+    }
+
+
     private void saveButton_actionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButton_actionPerformed
         save();
     }//GEN-LAST:event_saveButton_actionPerformed
@@ -493,7 +528,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private void saveAsButton_actionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsButton_actionPerformed
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(XML_FILE_FILTER);
-        File file = (! diagramFile.isDirectory()) ? diagramFile : new File(diagramFile, "." + XML_EXTENSION);
+        File file = (diagramFile != null && ! diagramFile.isDirectory()) ? diagramFile : new File(diagramFile, "." + XML_EXTENSION);
         fileChooser.setSelectedFile(file);
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             diagramFile = fileChooser.getSelectedFile();
@@ -539,11 +574,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
         final int index = diagramTabbedPane.getSelectedIndex();
         Rectangle bounds = diagramTabbedPane.getBoundsAt(index);
         bka.swing.PopupTextField popup = new bka.swing.PopupTextField(diagramTabbedPane.getTitleAt(index), bounds, EDIT_MIN_WIDTH);
-        popup.addListener(new bka.swing.PopupTextField.Listener() {
-            public void textChanged(String text) {
-                diagramComponent(index).setTitle(text);
-                updateTabTitle(index);
-            }
+        popup.addListener((String text) -> {
+            diagramComponent(index).setTitle(text);
+            updateTabTitle(index);
         });
         popup.show(diagramTabbedPane);
     }
@@ -566,7 +599,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         updateFileStatus();
     }
 
-    
+
     private void load() {
         java.beans.XMLDecoder xmlDecoder = null;
         try {
@@ -574,17 +607,21 @@ public class GraphEditor extends bka.swing.FrameApplication {
             ArrayList<DiagramPage> pages = (ArrayList<DiagramPage>) xmlDecoder.readObject();
             for (DiagramPage page : (ArrayList<DiagramPage>) pages) {
                 DiagramComponent diagramComponent = new DiagramComponent(this, page);
+                for (VertexPicture vertexPicture : diagramComponent.getVertexPictures()) {
+                    vertexPicture.initAttachmentPoints();
+                }
                 addDiagramTab(diagramComponent);
             }
             diagramTabbedPane.setSelectedIndex((Integer) xmlDecoder.readObject());
             vertexTreePanel.rebuild();
         }
         catch (FileNotFoundException ex) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.INFO, diagramFile.toString(), ex);
             JOptionPane.showMessageDialog(this, "'" + diagramFile.getPath() + "' not found", "File not found", JOptionPane.ERROR_MESSAGE);
             resetDiagramFile();
         }
-        catch (Exception ex) {
-            ex.printStackTrace(System.err);
+        catch (RuntimeException ex) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
             JOptionPane.showMessageDialog(this, "Error loading '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
             resetDiagramFile();
         }
@@ -608,7 +645,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     private ArrayList<DiagramPage> getDiagramPages() {
-        ArrayList<DiagramPage> pages = new ArrayList<DiagramPage>();
+        ArrayList<DiagramPage> pages = new ArrayList<>();
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
             DiagramPage page = new DiagramPage();
@@ -677,6 +714,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     private final ActionListener PICTURE_BUTTON_LISTENER = new ActionListener() {
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
             Object clickedButton = evt.getSource();
             for (JToggleButton button : vertexPictureClasses.keySet()) {
@@ -692,6 +730,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
         }
         
     };
+
+
+    protected Listener listener;
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -711,20 +752,20 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
     
-    VertexTreePanel vertexTreePanel = new VertexTreePanel(this);
+    final VertexTreePanel vertexTreePanel;
     
 
-    private Map<JToggleButton, Class> vertexPictureClasses = new HashMap<JToggleButton, Class>();
-    private Map<JToggleButton, Class> edgePictureClasses = new HashMap<JToggleButton, Class>();
+    private final Map<JToggleButton, Class> vertexPictureClasses = new HashMap<JToggleButton, Class>();
+    private final Map<JToggleButton, Class> edgePictureClasses = new HashMap<JToggleButton, Class>();
     
     
-    private File diagramFile = null;
+    private File diagramFile;
     
     
     private static final String XML_EXTENSION = "xml";
     private static final javax.swing.filechooser.FileNameExtensionFilter XML_FILE_FILTER = new javax.swing.filechooser.FileNameExtensionFilter("XML Graphs", XML_EXTENSION);
 
-    private final String DIAGRAM_FILE_PROPERTY = "DiagramFile";
+    private static final String DIAGRAM_FILE_PROPERTY = "DiagramFile";
     
     private static final int EDIT_MIN_WIDTH = 50;
 

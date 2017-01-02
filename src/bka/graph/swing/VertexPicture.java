@@ -29,6 +29,7 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
+    @Override
     public void paint(Graphics2D g2d) {
         g2d.setStroke(stroke);
         g2d.setColor(drawColor);
@@ -72,19 +73,17 @@ public class VertexPicture extends AbstractPicture {
         switch (direction) {
             case NORTH:
             case SOUTH:
-                setSize(new Dimension(size.width, Math.abs(point.y - location.y) * 2));
+                setSize(new Dimension(size.width, resizeHeigth(point)));
                 break;
             case WEST:
             case EAST:
-                setSize(new Dimension(Math.abs(point.x - location.x) * 2, size.height));
+                setSize(new Dimension(resizeWidth(point), size.height));
                 break;
             case NORTH_WEST: 
             case NORTH_EAST: 
             case SOUTH_WEST: 
             case SOUTH_EAST: 
-                setSize(new Dimension(
-                    Math.abs(point.x - location.x) * 2,
-                    Math.abs(point.y - location.y) * 2));
+                setSize(new Dimension(resizeWidth(point), resizeHeigth(point)));
                 break;
         }
     }
@@ -115,6 +114,7 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
+    @Override
     public boolean isLocatedAt(Point point) {
         return locationOf(point) != EXTERN;
     }
@@ -136,21 +136,25 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
+    @Override
     protected final int yNorth() {
         return location.y - size.height/2;
     }
     
 
+    @Override
     protected final int ySouth() {
         return location.y + size.height/2;
     }
     
 
+    @Override
     protected final int xWest() {
         return location.x - size.width/2;
     }
     
 
+    @Override
     protected final int xEast() {
         return location.x + size.width/2;
     }
@@ -223,7 +227,17 @@ public class VertexPicture extends AbstractPicture {
         }
     }
     
-    
+
+    private int resizeWidth(Point point) {
+        return Math.abs(point.x - location.x) * 2;
+    }
+
+
+    private int resizeHeigth(Point point) {
+        return Math.abs(point.y - location.y) * 2;
+    }
+
+
     protected Point[] attachmentPoints;
     
     protected Point location;

@@ -8,10 +8,11 @@ import bka.graph.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.logging.*;
 import javax.swing.*;
 
 
-class DiagramComponent extends JComponent {
+public class DiagramComponent extends JComponent {
 
     
     protected DiagramComponent(GraphEditor editor) {
@@ -31,8 +32,43 @@ class DiagramComponent extends JComponent {
     }
 
 
+    public final void addVertexPicture(VertexPicture vertexPicture, Point point) {
+        vertexPicture.init(point);
+        setVertexLocation(vertexPicture, point);
+        vertexPictureAdded(vertexPicture);
+    }
+
+
+    public final void addEdgePicture(EdgePicture edgePicture) {
+        for (int i = pictures.size() - 1; i >= 0;  --i) {
+            AbstractPicture abstractPicture = pictures.get(i);
+            if (edgePicture.getOriginPicture() == abstractPicture || edgePicture.getTerminusPicture() == abstractPicture) {
+                pictures.add(i, edgePicture);
+                setComponentSize(edgePicture.xEast(), edgePicture.ySouth());
+                break;
+            }
+        }
+    }
+
+
+    public final void removeEdgePicture(EdgePicture edgePicture) {
+        pictures.remove(edgePicture);
+    }
+
+
+    public final ArrayList<VertexPicture> getVertexPictures() {
+        ArrayList<VertexPicture> vertices = new ArrayList<VertexPicture>();
+        for (AbstractPicture picture : pictures) {
+            if (picture instanceof VertexPicture) {
+                vertices.add((VertexPicture) picture);
+            }
+        }
+        return vertices;
+    }
+
+
+    @Override
     public void paint(Graphics g) {
-//        ArrayList<EdgePicture> notVisited = new ArrayList<EdgePicture>(edges);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
@@ -57,60 +93,6 @@ class DiagramComponent extends JComponent {
                 picture.paint(g2d);
             }
         }
-//        for (VertexPicture vertexPicture : vertices) {
-//            if (vertexPicture == highlightedPicture) {
-//                Color drawColor = vertexPicture.getDrawColor();
-//                Stroke normalStroke = g2d.getStroke();
-//                BasicStroke highlightStroke = new BasicStroke(2.0f);
-//                g2d.setStroke(highlightStroke);
-//                vertexPicture.setDrawColor(new Color(0, 255, 0, 127));
-//                vertexPicture.paint(g2d);
-//                vertexPicture.setDrawColor(drawColor);
-//                g2d.setStroke(normalStroke);
-//            }
-//            else if (vertexPicture == selectedPicture) {
-//                Color drawColor = vertexPicture.getDrawColor();
-//                vertexPicture.setDrawColor(Color.BLUE);
-//                vertexPicture.paint(g2d);
-//                vertexPicture.setDrawColor(drawColor);
-//            }
-//            else {
-//                vertexPicture.paint(g2d);
-//            }
-//            
-//            //* Paint edge pictures together with their top most vertex
-//            for (EdgePicture edgePicture : edges) {
-//                VertexPicture origin = edgePicture.getOriginPicture();
-//                VertexPicture terminus = edgePicture.getTerminusPicture();
-//                if (origin == vertexPicture || terminus == vertexPicture) {
-//                    boolean removed = notVisited.remove(edgePicture);
-//                    if (! removed || origin == terminus) {
-//                        if (edgePicture == selectedPicture) {
-//                            Color drawColor = edgePicture.getDrawColor();
-//                            edgePicture.setDrawColor(Color.BLUE);
-//                            edgePicture.paint(g2d);
-//                            edgePicture.setDrawColor(drawColor);
-//                        }
-//                        else if (hoverInfo != null && hoverInfo.picture == edgePicture) {
-//                            Color drawColor = edgePicture.getDrawColor();
-//                            edgePicture.setDrawColor(Color.GREEN);
-//                            edgePicture.paint(g2d);
-//                            edgePicture.setDrawColor(drawColor);
-//                        }
-//                        else {
-//                            edgePicture.paint(g2d);
-//                        }
-//                    }
-//                    if (edgePicture.getTerminusPicture() == null) {
-//                        //* New edge picture being dragged
-//                        Color drawColor = edgePicture.getDrawColor();
-//                        edgePicture.setDrawColor(Color.GRAY);
-//                        edgePicture.paint(g2d);
-//                        edgePicture.setDrawColor(drawColor);
-//                    }
-//                }
-//            }
-//        }
         if (attachmentPoint != null) {
             g2d.setColor(attachmentPointColor);
             g2d.fillOval(attachmentPoint.x - attachmentPointWidth / 2, attachmentPoint.y - attachmentPointHeight / 2, attachmentPointWidth, attachmentPointHeight);
@@ -128,21 +110,9 @@ class DiagramComponent extends JComponent {
     }
 
     
-    protected final ArrayList<VertexPicture> getVertexPictures() {
-        ArrayList<VertexPicture> vertices = new ArrayList<VertexPicture>();
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof VertexPicture) {
-                vertices.add((VertexPicture) picture);
-            }
-        }
-        return vertices;
-    }
-    
-    
     protected final void setVertexPictures(Collection<VertexPicture> vertexPictures) {
         if (vertexPictures != null) {
             pictures.addAll(vertexPictures);
-//            vertices.addAll(pictures);
             int southMost = Integer.MIN_VALUE;
             int eastMost = Integer.MIN_VALUE;
             for (AbstractPicture picture : pictures) {
@@ -167,38 +137,12 @@ class DiagramComponent extends JComponent {
     
     protected final void setEdgePictures(Collection<EdgePicture> edgePictures) {
         if (edgePictures != null) {
-//            edges.addAll(pictures);
-//            int southMost = Integer.MIN_VALUE;
-//            int eastMost = Integer.MIN_VALUE;
             for (EdgePicture picture : edgePictures) {
                 addEdgePicture(picture);
             }
-//                southMost = Math.max(picture.ySouth(), southMost);
-//                eastMost = Math.max(picture.xEast(), eastMost);
-//                for (int i = paintOrder.size() - 1; i >= 0;  --i) {
-//                    AbstractPicture abstractPicture = paintOrder.get(i);
-//                    if (abstractPicture instanceof VertexPicture && (picture.getOriginPicture() == abstractPicture || picture.getTerminusPicture() == abstractPicture)) {
-//                        paintOrder.add(i, picture);
-//                        break;
-//                    }
-//                }
-//            }
-//            setComponentSize(eastMost, southMost);
         }
     }
     
-    
-    protected final void addEdgePicture(EdgePicture edgePicture) {
-        for (int i = pictures.size() - 1; i >= 0;  --i) {
-            AbstractPicture abstractPicture = pictures.get(i);
-            if (edgePicture.getOriginPicture() == abstractPicture || edgePicture.getTerminusPicture() == abstractPicture) {
-                pictures.add(i, edgePicture);
-                setComponentSize(edgePicture.xEast(), edgePicture.ySouth());
-                break;
-            }
-        }
-    }
-
     
     protected void setHighlighted(VertexPicture picture) {
         highlightedPicture = picture;
@@ -211,7 +155,6 @@ class DiagramComponent extends JComponent {
     
 
     protected void addVertex(VertexPicture picture) {
-//        vertices.add(picture);
         pictures.add(picture);
         setComponentSize(picture.xEast(), picture.ySouth());
     }
@@ -289,22 +232,20 @@ class DiagramComponent extends JComponent {
     private void addNewVertexPicture(Class vertexPictureClass, Point point) {
         try {
             VertexPicture vertexPicture = (VertexPicture) vertexPictureClass.newInstance();
-            vertexPicture.init(point);
-            setVertexLocation(vertexPicture, point);
-            vertexPictureAdded(vertexPicture);
+            addVertexPicture(vertexPicture, point);
         }
-        catch (Exception ex) { // InstantiationException, IllegalAccessException
-            ex.printStackTrace(System.err);
+        catch (ReflectiveOperationException ex) {
+            Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, vertexPictureClass.getName(), ex);
         }
     }
-    
-    
+
+
     private void vertexPictureAdded(VertexPicture vertexPicture) {
         addVertex(vertexPicture);
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         selectedPicture = vertexPicture;
         repaint(/*vertexPicture.rectangle()*/);
-        editor.vetrexPictureAdded(vertexPicture);
+        editor.vertexPictureAdded(this, vertexPicture);
     }
     
     
@@ -416,6 +357,7 @@ class DiagramComponent extends JComponent {
                 int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
                 if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                     dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
+                    editor.edgePictureAdded(this, dragInfo.edge);
                 }
                 else {
                     pictures.remove(dragInfo.edge);
@@ -545,21 +487,21 @@ class DiagramComponent extends JComponent {
     }
     
     
-    private Rectangle rectangle(VertexPicture vertexPicture) {
-        Rectangle rectangle = vertexPicture.rectangle();
-        rectangle.width += 1;
-        rectangle.height += 1;
-        ArrayList<VertexPicture> children = allContainedVertices(vertexPicture);
-        for (EdgePicture edgePicture : getEdgePictures()) {
-            VertexPicture origin = edgePicture.getOriginPicture();
-            VertexPicture terminus = edgePicture.getTerminusPicture();
-            if (origin == vertexPicture || terminus == vertexPicture || children.contains(origin) || children.contains(terminus)) {
-                rectangle.add(edgePicture.rectangle());
-            }
-        }
-        return rectangle;
-    }
-    
+//    private Rectangle rectangle(VertexPicture vertexPicture) {
+//        Rectangle rectangle = vertexPicture.rectangle();
+//        rectangle.width += 1;
+//        rectangle.height += 1;
+//        ArrayList<VertexPicture> children = allContainedVertices(vertexPicture);
+//        for (EdgePicture edgePicture : getEdgePictures()) {
+//            VertexPicture origin = edgePicture.getOriginPicture();
+//            VertexPicture terminus = edgePicture.getTerminusPicture();
+//            if (origin == vertexPicture || terminus == vertexPicture || children.contains(origin) || children.contains(terminus)) {
+//                rectangle.add(edgePicture.rectangle());
+//            }
+//        }
+//        return rectangle;
+//    }
+//
     
     private void openDialog(Vertex vertex) {
         vertexPanel.setEnvironment(editor); 
@@ -686,8 +628,6 @@ class DiagramComponent extends JComponent {
     
     
     private void ensureDrawnLast(VertexPicture vertexPicture) {
-//        vertices.remove(vertexPicture);
-//        vertices.add(vertexPicture);
         ArrayList<AbstractPicture> picturesToMove = new ArrayList<AbstractPicture>();
         picturesToMove.add(vertexPicture);
         for (AbstractPicture picture : pictures) {
@@ -769,6 +709,7 @@ class DiagramComponent extends JComponent {
     
     private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
 
+        @Override
         public void mouseClicked(MouseEvent evt) {
             switch (evt.getButton()) {
                 case MouseEvent.BUTTON1:
@@ -780,12 +721,14 @@ class DiagramComponent extends JComponent {
             }
         }
         
+        @Override
         public void mousePressed(MouseEvent evt) {
             if (evt.getButton() == MouseEvent.BUTTON1) {
                 startDrag(evt.getPoint());
             }
         }
         
+        @Override
         public void mouseReleased(MouseEvent evt) {
             if (evt.getButton() == MouseEvent.BUTTON1) {
                 Point point = evt.getPoint();
@@ -803,24 +746,29 @@ class DiagramComponent extends JComponent {
             }
         }
         
+        @Override
         public void mouseMoved(MouseEvent evt) {
             hoverDiagram(evt.getPoint());
         }
         
+        @Override
         public void mouseDragged(MouseEvent evt) {
-            assert dragInfo != null;
-            if (dragInfo.vertex != null) {
-                dragVertex(evt.getPoint());
-            }
-            else if (dragInfo.edge != null) {
-                dragEdge(evt.getPoint());
+            if (dragInfo != null) {
+                if (dragInfo.vertex != null) {
+                    dragVertex(evt.getPoint());
+                }
+                else if (dragInfo.edge != null) {
+                    dragEdge(evt.getPoint());
+                }
             }
         }
         
+        @Override
         public void mouseEntered(MouseEvent evt) {
             editor.diagramEntered(evt);
         }
 
+        @Override
         public void mouseExited(MouseEvent evt) {
             editor.diagramExited();
         }
@@ -828,12 +776,11 @@ class DiagramComponent extends JComponent {
     };
     
     
-    private KeyAdapter KEY_ADAPTER = new KeyAdapter() {
+    private final KeyAdapter KEY_ADAPTER = new KeyAdapter() {
 
+        @Override
         public void keyReleased(KeyEvent evt) {
             if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-//                ArrayList<VertexPicture> verticesToDelete = new ArrayList<VertexPicture>();
-//                ArrayList<EdgePicture> edgesToDelete = new ArrayList<EdgePicture>();
                 ArrayList<AbstractPicture> picturesToDelete = new ArrayList<AbstractPicture>();
                 for (AbstractPicture picture : pictures) {
                     if (picture == selectedPicture) {
@@ -843,13 +790,6 @@ class DiagramComponent extends JComponent {
                         }
                     }
                 }
-//                for (EdgePicture picture : edges) {
-//                    if (picture == selectedPicture || picture.getOriginPicture() == selectedPicture || picture.getTerminusPicture() == selectedPicture) {
-//                        edgesToDelete.add(picture);
-//                    }
-//                }
-//                vertices.removeAll(verticesToDelete);
-//                edges.removeAll(edgesToDelete);
                 pictures.removeAll(picturesToDelete);
                 repaint();
             }
@@ -859,21 +799,9 @@ class DiagramComponent extends JComponent {
 
     
     private GraphEditor editor;
+    private String title;
 
-    private String title = null;
-    
-//    private ArrayList<EdgePicture> edges = new ArrayList<EdgePicture>();
-//    private ArrayList<VertexPicture> vertices = new ArrayList<VertexPicture>();
-    
     private ArrayList<AbstractPicture> pictures = new ArrayList<AbstractPicture>();
-
-//    public ArrayList<AbstractPicture> getPictures() {
-//        return pictures;
-//    }
-//
-//    public void setPictures(ArrayList<AbstractPicture> pictures) {
-//        this.pictures = pictures;
-//    }
 
     private AbstractPicture selectedPicture = null;
 

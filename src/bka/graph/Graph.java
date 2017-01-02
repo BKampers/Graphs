@@ -109,7 +109,7 @@ public class Graph {
     
     
     public Collection<Edge> allDirectedEdgesFrom(Vertex vertex) {
-        Collection<Edge> collection = new Vector<Edge>();
+        Collection<Edge> collection = new ArrayList<>();
         Iterator<Edge> ie = edges.iterator();
         while (ie.hasNext()) {
             Edge edge = ie.next();
@@ -122,7 +122,7 @@ public class Graph {
     
     
     public Collection<Edge> allDirectedEdgesTo(Vertex vertex) {
-        Collection<Edge> collection = new Vector<Edge>();
+        Collection<Edge> collection = new ArrayList<>();
         Iterator<Edge> ie = edges.iterator();
         while (ie.hasNext()) {
             Edge edge = ie.next();
@@ -135,7 +135,7 @@ public class Graph {
     
     
     public Collection<Edge> allUndirectedEdgesFrom(Vertex vertex) {
-        Collection<Edge> collection = new Vector<Edge>();
+        Collection<Edge> collection = new ArrayList<>();
         Iterator<Edge> ie = edges.iterator();
         while (ie.hasNext()) {
             Edge edge = ie.next();
@@ -167,7 +167,7 @@ public class Graph {
     
     
     public List<Vertex> directedWalk(Vertex start, Vertex end) {
-        List<Vertex> walk = new Vector<Vertex>();
+        List<Vertex> walk = new ArrayList<>();
         findDirectedWalk(walk, start, end);
         return walk;
     }
@@ -218,9 +218,9 @@ public class Graph {
             return null;
         }
     }
-       
 
-    private Collection<Vertex> vertices = new Vector<Vertex>();
-    private Collection<Edge> edges = new Vector<Edge>();
+
+    private final Collection<Vertex> vertices = new ArrayList<>();
+    private final Collection<Edge> edges = new ArrayList<>();
     
 }

@@ -9,8 +9,17 @@ import java.awt.*;
 
 
 abstract class AbstractPicture {
-    
-    
+
+
+    public abstract void paint(Graphics2D g2d);
+    public abstract boolean isLocatedAt(Point point);
+
+    protected abstract int xWest();
+    protected abstract int xEast();
+    protected abstract int yNorth();
+    protected abstract int ySouth();
+
+   
     public void setDrawColor(Color color) {
         if (color != null) {
             this.drawColor = color;
@@ -40,32 +49,21 @@ abstract class AbstractPicture {
         }
     }
 
-    
-    public abstract void paint(Graphics2D g2d);
-    public abstract boolean isLocatedAt(Point point);
-        
-    
-    protected int squareDistance(Point p, Point q) {
-        int δx = p.x - q.x;
-        int δy = p.y - q.y;
-        return δx*δx + δy*δy;
-    }
-    
-    
-    protected Rectangle rectangle() {
+
+    public Rectangle bounds() {
         int x = xWest();
         int y = yNorth();
         return new Rectangle(x, y, xEast() - x, ySouth() - y);
     }
-    
-
-    protected abstract int xWest();
-    protected abstract int xEast();
-    protected abstract int yNorth();
-    protected abstract int ySouth();
 
     
-    
+    protected static int squareDistance(Point p, Point q) {
+        int δx = p.x - q.x;
+        int δy = p.y - q.y;
+        return δx*δx + δy*δy;
+    }
+
+
     protected Color drawColor = DEFAULT_DRAW_COLOR;
     protected Stroke stroke = DEFAULT_STROKE;
             

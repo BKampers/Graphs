@@ -13,7 +13,8 @@ public class ContainerEdge extends Edge {
         super(container, contained, true);
     }
     
-    
+
+    @Override
     public boolean equals(Object other) {
         return 
             other instanceof ContainerEdge && 
@@ -22,7 +23,8 @@ public class ContainerEdge extends Edge {
     } 
 
 
-    // <editor-fold defaultstate="collapsed" desc="Generated hashCode"> 
+    // <editor-fold defaultstate="collapsed" desc="Generated hashCode">
+    @Override
     public int hashCode() {
         return 7;
     }
