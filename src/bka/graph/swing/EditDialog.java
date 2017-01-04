@@ -39,19 +39,15 @@ public class EditDialog extends JDialog {
         Dimension preferredSize = new Dimension(100, 25);
         okButton = new JButton("Ok");
         okButton.setPreferredSize(preferredSize);
-        okButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                contentPanel.confirm();
-                dispose();
-            }
+        okButton.addActionListener((ActionEvent evt) -> {
+            contentPanel.confirm();
+            dispose();
         });
         buttonPanel.add(okButton);
         cancelButton = new JButton("Cancel");
         cancelButton.setPreferredSize(preferredSize);
-        cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
+        cancelButton.addActionListener((ActionEvent evt) -> {
+            dispose();
         });
         buttonPanel.add(cancelButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);

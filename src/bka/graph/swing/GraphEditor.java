@@ -15,13 +15,13 @@ import javax.swing.*;
 
 
 public class GraphEditor extends bka.swing.FrameApplication {
-    
-    
-    public interface Listener {
-        void vertexPictureAdded(VertexPicture vertexPicture);
+
+
+    public interface OnLoadDelegate {
+        void onLoad();
     }
-
-
+    
+    
     public GraphEditor() {
         initComponents();
         addGraphButtons();
@@ -215,8 +215,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     protected void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture edgePicture) {
     }
-    
-    
+
+
+    protected void edgePictureRemoved(EdgePicture edgePicture) {
+    }
+
+
     protected void setHighlighted(VertexPicture picture) {
         DiagramComponent selected = selectedDiagramComponent();
         assert selected != null;
@@ -614,6 +618,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
             }
             diagramTabbedPane.setSelectedIndex((Integer) xmlDecoder.readObject());
             vertexTreePanel.rebuild();
+            if (onLoadDelegate != null) {
+                onLoadDelegate.onLoad();
+            }
         }
         catch (FileNotFoundException ex) {
             Logger.getLogger(GraphEditor.class.getName()).log(Level.INFO, diagramFile.toString(), ex);
@@ -732,9 +739,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
     };
 
 
-    protected Listener listener;
-    
-    
+    protected OnLoadDelegate onLoadDelegate;
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JMenuItem deleteDiagramMenuItem;
@@ -755,8 +762,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
     final VertexTreePanel vertexTreePanel;
     
 
-    private final Map<JToggleButton, Class> vertexPictureClasses = new HashMap<JToggleButton, Class>();
-    private final Map<JToggleButton, Class> edgePictureClasses = new HashMap<JToggleButton, Class>();
+    private final Map<JToggleButton, Class> vertexPictureClasses = new HashMap<>();
+    private final Map<JToggleButton, Class> edgePictureClasses = new HashMap<>();
     
     
     private File diagramFile;
