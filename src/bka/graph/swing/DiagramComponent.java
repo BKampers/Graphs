@@ -29,22 +29,14 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void initialize() {
-        setSize(0, 0);
-        addMouseListener(MOUSE_ADAPTER);
-        addMouseMotionListener(MOUSE_ADAPTER);
-        addKeyListener(KEY_ADAPTER);
-    }
-
-
-    private void addVertexPicture(VertexPicture vertexPicture, Point point) {
+    public void addVertexPicture(VertexPicture vertexPicture, Point point) {
         vertexPicture.init(point);
         setVertexLocation(vertexPicture, point);
         vertexPictureAdded(vertexPicture);
     }
 
 
-    private void addEdgePicture(EdgePicture edgePicture) {
+    public void addEdgePicture(EdgePicture edgePicture) {
         for (int i = pictures.size() - 1; i >= 0;  --i) {
             AbstractPicture abstractPicture = pictures.get(i);
             if (edgePicture.getOriginPicture() == abstractPicture || edgePicture.getTerminusPicture() == abstractPicture) {
@@ -56,6 +48,11 @@ public class DiagramComponent extends JComponent {
     }
 
 
+    public final void removeEdgePicture(EdgePicture edgePicture) {
+        pictures.remove(edgePicture);
+    }
+
+    
     public final ArrayList<VertexPicture> getVertexPictures() {
         ArrayList<VertexPicture> vertices = new ArrayList<>();
         for (AbstractPicture picture : pictures) {
@@ -213,6 +210,23 @@ public class DiagramComponent extends JComponent {
     }
     
     
+    private void initialize() {
+        setSize(0, 0);
+        addMouseListener(MOUSE_ADAPTER);
+        addMouseMotionListener(MOUSE_ADAPTER);
+        addKeyListener(KEY_ADAPTER);
+    }
+
+
+    private void setComponentSize(int width, int height) {
+        Dimension dimension = getSize();
+        dimension.width = Math.max(dimension.width, width);
+        dimension.height = Math.max(dimension.height, height);
+        setPreferredSize(dimension);
+        setSize(dimension);
+    }
+
+
     private void vertexPictureClicked(VertexPicture vertexPicture, int count) {
         if (count == 1) {
             setSelected(vertexPicture);
@@ -500,14 +514,14 @@ public class DiagramComponent extends JComponent {
             addNewVertexPicture(vertexPictureClass, point);
         }
         else {
-            VertexPicture vertexPicture = getVertexPicture(point);
-            if (vertexPicture != null) {
-                vertexPictureClicked(vertexPicture, count);
+            EdgePicture edgePicture = getEdgePicture(point);
+            if (edgePicture != null) {
+                edgePictureClicked(edgePicture);
             }
             else {
-                EdgePicture edgePicture = getEdgePicture(point);
-                if (edgePicture != null) {
-                    edgePictureClicked(edgePicture);
+                VertexPicture vertexPicture = getVertexPicture(point);
+                if (vertexPicture != null) {
+                    vertexPictureClicked(vertexPicture, count);
                 }
             }
         }
@@ -629,15 +643,6 @@ public class DiagramComponent extends JComponent {
         return all;
     }
 
-    
-    private void setComponentSize(int width, int height) {
-        Dimension dimension = getSize();
-        dimension.width = Math.max(dimension.width, width);
-        dimension.height = Math.max(dimension.height, height);
-        setPreferredSize(dimension);
-        setSize(dimension);
-    }
-    
     
     private void setCursor(int type) {
         if (getCursor().getType() != type) {

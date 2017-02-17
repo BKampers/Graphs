@@ -11,7 +11,8 @@ import javax.swing.*;
 
 
 public class EditDialog extends JDialog {
-    
+
+
     public EditDialog(Frame owner, String title, AbstractEditPanel abstractEditPanel) {
         super(owner, title, true);
         initialize(abstractEditPanel);
@@ -27,8 +28,8 @@ public class EditDialog extends JDialog {
     public void enableOkButton(boolean enabled) {
         okButton.setEnabled(enabled);
     }
-    
-    
+
+
     private void initialize(AbstractEditPanel abstractEditPanel) {
         contentPanel = abstractEditPanel;
         contentPanel.setEditDialog(this);
