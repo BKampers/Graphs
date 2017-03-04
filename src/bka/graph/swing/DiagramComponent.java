@@ -70,24 +70,29 @@ public class DiagramComponent extends JComponent {
         g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         for (AbstractPicture picture : pictures) {
-            if (picture == highlightedPicture) {
-                Color drawColor = picture.getDrawColor();
-                Stroke normalStroke = g2d.getStroke();
-                BasicStroke highlightStroke = new BasicStroke(2.0f);
-                g2d.setStroke(highlightStroke);
-                picture.setDrawColor(new Color(0, 255, 0, 127));
-                picture.paint(g2d);
-                picture.setDrawColor(drawColor);
-                g2d.setStroke(normalStroke);
+            try {
+                if (picture == highlightedPicture) {
+                    Color drawColor = picture.getDrawColor();
+                    Stroke normalStroke = g2d.getStroke();
+                    BasicStroke highlightStroke = new BasicStroke(2.0f);
+                    g2d.setStroke(highlightStroke);
+                    picture.setDrawColor(new Color(0, 255, 0, 127));
+                    picture.paint(g2d);
+                    picture.setDrawColor(drawColor);
+                    g2d.setStroke(normalStroke);
+                }
+                else if (picture == selectedPicture) {
+                    Color drawColor = picture.getDrawColor();
+                    picture.setDrawColor(Color.BLUE);
+                    picture.paint(g2d);
+                    picture.setDrawColor(drawColor);
+                }
+                else {
+                    picture.paint(g2d);
+                }
             }
-            else if (picture == selectedPicture) {
-                Color drawColor = picture.getDrawColor();
-                picture.setDrawColor(Color.BLUE);
-                picture.paint(g2d);
-                picture.setDrawColor(drawColor);
-            }
-            else {
-                picture.paint(g2d);
+            catch (RuntimeException ex) {
+                Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Eelement paint", ex);
             }
         }
         if (attachmentPoint != null) {
