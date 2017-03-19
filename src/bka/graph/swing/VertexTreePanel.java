@@ -42,23 +42,6 @@ class VertexTreePanel extends javax.swing.JPanel {
     }
     
     
-    @Deprecated
-    void oldRebuild() {
-        ROOT_NODE.removeAllChildren();
-        for (Vertex vertex : graphEditor.allVertices()) {
-            VertexClassNode vertexClassNode = getVertexClassNode(vertex.getClass());
-            VertexNode vertexNode = new VertexNode(vertex);
-            vertexClassNode.add(vertexNode);
-        }
-        MODEL.nodeStructureChanged(ROOT_NODE);
-        Enumeration en = ROOT_NODE.children();
-        while (en.hasMoreElements()) {
-            VertexClassNode vertexClassNode = (VertexClassNode) en.nextElement();
-            expand(vertexClassNode);
-        }
-    }
-    
-    
     void diagramEntered(java.awt.event.MouseEvent evt) {
         if (dragInfo != null) {
             dragInfo.diagramComponent = (DiagramComponent) evt.getComponent();
@@ -198,6 +181,7 @@ class VertexTreePanel extends javax.swing.JPanel {
             super(diagramComponent);
         }
         
+        @Override
         public String toString() {
             return ((DiagramComponent) getUserObject()).getTitle();
         }
@@ -211,6 +195,7 @@ class VertexTreePanel extends javax.swing.JPanel {
             super(vertexClass);
         }
         
+        @Override
         public String toString() {
             return ((Class) getUserObject()).getSimpleName();
         }
@@ -226,6 +211,7 @@ class VertexTreePanel extends javax.swing.JPanel {
             this.diagramComponent = diagramComponent;
         }
         
+        @Override
         public String toString() {
             VertexPicture vertexPicture = ((VertexPicture) getUserObject());
             Vertex vertex = vertexPicture.getVertex();
@@ -262,6 +248,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     
     static class CellRenderer extends DefaultTreeCellRenderer {
 
+        @Override
         public Component getTreeCellRendererComponent(javax.swing.JTree tree, java.lang.Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
             createIcon(value);
@@ -280,12 +267,7 @@ class VertexTreePanel extends javax.swing.JPanel {
                 }
                 else {
                     if (value instanceof VertexPictureNode) {
-                        try {
-                            icon = ((VertexPicture) ((VertexPictureNode) value).getUserObject()).createIcon(16, 14);
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace(System.err);
-                        }
+                        icon = ((VertexPicture) ((VertexPictureNode) value).getUserObject()).createIcon(16, 14);
                         ICONS.put(nodeClass, icon);
                     }
                 }
@@ -306,6 +288,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     
     private final java.awt.event.MouseAdapter MOUSE_ADAPTER = new java.awt.event.MouseAdapter() {
         
+        @Override
         public void mousePressed(java.awt.event.MouseEvent evt) {
             TreePath path = tree.getPathForLocation(evt.getX(), evt.getY());
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
@@ -322,6 +305,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
         }
         
+        @Override
         public void mouseReleased(java.awt.event.MouseEvent evt) {
             if (dragInfo != null) {
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
@@ -338,7 +322,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     };
 
     
-    private GraphEditor graphEditor;
+    private final GraphEditor graphEditor;
     
     
     private DragInfo dragInfo = null;

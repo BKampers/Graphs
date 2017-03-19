@@ -4,7 +4,6 @@
 
 package bka.graph.swing;
 
-import bka.graph.ContainerEdge;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -30,73 +29,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    public Collection<Vertex> allVertices() {
-        Collection<Vertex> collection = new HashSet<>(); // HashSet avoids duplicates
-        for (DiagramComponent diagramComponent : getDiagramComponents()) {
-            for (VertexPicture picture : diagramComponent.getVertexPictures()) {
-                collection.add(picture.getVertex());
-            }
-        }
-        return collection;
-    }
-    
-
-    public Collection<Vertex> allVertices(Class<? extends Vertex> vertexClass) {
-        Collection<Vertex> collection = new HashSet<>(); // HashSet avoids duplicates
-        for (DiagramComponent diagramComponent : getDiagramComponents()) {
-            for (VertexPicture picture : diagramComponent.getVertexPictures()) {
-                Vertex vertex = picture.getVertex();
-                if (vertex.getClass() == vertexClass) {
-                    collection.add(vertex);
-                }
-            }
-        }
-        return collection;
-    }
-    
-    
-    public Collection<Edge> allEdges() {
-        Collection<Edge> collection = new HashSet<>(); // HashSet avoids duplicates
-        for (DiagramComponent diagramComponent : getDiagramComponents()) {
-            for (EdgePicture picture : diagramComponent.getEdgePictures()) {
-                collection.add(picture.getEdge());
-            }
-        }
-        return collection;
+    public Book getBook() {
+        return book;
     }
 
-    
-    public Collection<Edge> allEdges(Class<? extends Edge> edgeClass) {
-        Collection<Edge> collection = new HashSet<>(); // HashSet avoids duplicates
-        for (DiagramComponent diagramComponent : getDiagramComponents()) {
-            for (EdgePicture  picture : diagramComponent.getEdgePictures()) {
-                Edge edge = picture.getEdge();
-                if (edge.getClass() == edgeClass) {
-                    collection.add(edge);
-                }
-            }
-        }
-        return collection;
-    }
-    
-    
-    public Graph graph() {
-        Graph graph = new Graph(allVertices(), allEdges());
-        for (DiagramComponent diagramComponent : getDiagramComponents()) {
-            for (VertexPicture vertexPicture : diagramComponent.getVertexPictures()) {
-                VertexPicture container = diagramComponent.findContainer(vertexPicture);
-                if (container != null) {
-                    ContainerEdge containerEdge = new ContainerEdge(container.getVertex(), vertexPicture.getVertex());
-                    if (! graph.contains(containerEdge)) {
-                        graph.add(containerEdge);
-                    }
-                }
-            }
-        }
-        return graph;
-    }
-    
-    
+
     public void addVertexButton(String name, Class vertexPictureClass) {
         JToggleButton button = new JToggleButton(name);
         button.addActionListener(PICTURE_BUTTON_LISTENER);
@@ -150,6 +87,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     @Override
     protected void opened() {
+        book = new Book(getPersistenceDelegates());
         Object path = getProperty(DIAGRAM_FILE_PROPERTY);
         if (path != null) {
             diagramFile = new File(path.toString());
@@ -263,19 +201,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
         menu.add(colorItem);
         return menu;
     }
-    
-    
-    protected java.beans.XMLEncoder createEncoder() {
-        java.beans.XMLEncoder xmlEncoder = null;
-        try {
-            xmlEncoder = new java.beans.XMLEncoder(new java.io.BufferedOutputStream(new java.io.FileOutputStream(diagramFile)));
-        }
-        catch (java.io.FileNotFoundException ex) {
-            Logger.getLogger(GraphEditor.class.getName()).log(Level.INFO, diagramFile.toString(), ex);
-        }
-        return xmlEncoder;
-    }
 
+
+    protected Map<Class, java.beans.PersistenceDelegate> getPersistenceDelegates() {
+        return null;
+    }
+    
 
     protected void diagramRepaint() {
         DiagramComponent selected = selectedDiagramComponent();
@@ -289,8 +220,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
         assert selected != null;
         selected.clearHoverInfo();
     }
-    
-    
+
+
     void diagramEntered(MouseEvent evt) {
         vertexTreePanel.diagramEntered(evt);
     }
@@ -598,6 +529,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private void createEmptyBook() {
         diagramTabbedPane.removeAll();
         DiagramPage page = new DiagramPage();
+        book.addPage(page);
         addDiagramTab(new DiagramComponent(this, page));
         resetDiagramFile();
         updateFileStatus();
@@ -605,18 +537,17 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     private void load() {
-        java.beans.XMLDecoder xmlDecoder = null;
         try {
-            xmlDecoder = new java.beans.XMLDecoder(new BufferedInputStream(new FileInputStream(diagramFile)));
-            ArrayList<DiagramPage> pages = (ArrayList<DiagramPage>) xmlDecoder.readObject();
-            for (DiagramPage page : (ArrayList<DiagramPage>) pages) {
+            book.load(diagramFile);
+            ArrayList<DiagramPage> pages = book.getDiagramPages();
+            for (DiagramPage page : pages) {
                 DiagramComponent diagramComponent = new DiagramComponent(this, page);
                 for (VertexPicture vertexPicture : diagramComponent.getVertexPictures()) {
                     vertexPicture.initAttachmentPoints();
                 }
                 addDiagramTab(diagramComponent);
             }
-            diagramTabbedPane.setSelectedIndex((Integer) xmlDecoder.readObject());
+            diagramTabbedPane.setSelectedIndex(book.getPageIndex());
             vertexTreePanel.rebuild();
             if (onLoadDelegate != null) {
                 onLoadDelegate.onLoad();
@@ -632,21 +563,20 @@ public class GraphEditor extends bka.swing.FrameApplication {
             JOptionPane.showMessageDialog(this, "Error loading '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
             resetDiagramFile();
         }
-        if (xmlDecoder != null) {
-            xmlDecoder.close();
-        }
     }
 
         
     private void save() {
-        java.beans.XMLEncoder xmlEncoder = createEncoder();
-        if (xmlEncoder != null) {
-            xmlEncoder.writeObject(getDiagramPages());
-            xmlEncoder.writeObject(diagramTabbedPane.getSelectedIndex());
-            xmlEncoder.close();
+        try {
+            book.save(diagramFile);
         }
-        else {
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
             JOptionPane.showMessageDialog(this, "Could not save '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (RuntimeException ex) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
+            JOptionPane.showMessageDialog(this, "Error saving '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -737,6 +667,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
         }
         
     };
+
+
+    protected Book book;
 
 
     protected OnLoadDelegate onLoadDelegate;

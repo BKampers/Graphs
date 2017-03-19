@@ -44,6 +44,16 @@ public class DiagramPage {
     }
     
     
+    public VertexPicture findContainer(VertexPicture vertex) {
+        for (VertexPicture picture : vertices) {
+            if (picture.isLocatedAt(vertex.getLocation())) {
+                return picture;
+            }
+        }
+        return null;
+    }
+
+
     private String title;
     private Collection<VertexPicture> vertices;
     private Collection<EdgePicture> edges;
