@@ -46,7 +46,7 @@ public class DiagramPage {
     
     public VertexPicture findContainer(VertexPicture vertex) {
         for (VertexPicture picture : vertices) {
-            if (picture.isLocatedAt(vertex.getLocation())) {
+            if (vertex != picture && picture.isLocatedAt(vertex.getLocation())) {
                 return picture;
             }
         }
