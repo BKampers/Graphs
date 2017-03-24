@@ -4,13 +4,21 @@
 
 package bka.graph.swing;
 
-import java.util.Collection;
+import java.util.*;
 
 
 public class DiagramPage {
 
     
     public DiagramPage() {
+    }
+
+
+    public static DiagramPage createEmpty() {
+        DiagramPage empty = new DiagramPage();
+        empty.vertices = new ArrayList<>();
+        empty.edges = new ArrayList<>();
+        return empty;
     }
     
     

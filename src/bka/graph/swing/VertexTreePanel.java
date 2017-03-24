@@ -45,12 +45,18 @@ class VertexTreePanel extends javax.swing.JPanel {
     void diagramEntered(java.awt.event.MouseEvent evt) {
         if (dragInfo != null) {
             dragInfo.diagramComponent = (DiagramComponent) evt.getComponent();
+            boolean cannotDrop = dragInfo.diagramComponent.contains(dragInfo.picture);
+            Image image = (cannotDrop) ? dragInfo.createCannotDropImage() : dragInfo.createImage();
+            dragInfo.diagramComponent.setCursor(createCursor(image, "DropVertexCursor"));
         }
     }
     
     
     void diagramExited() {
         if (dragInfo != null) {
+            if (dragInfo.diagramComponent != null) {
+                dragInfo.diagramComponent.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
             dragInfo.diagramComponent = null;
         }
     }
@@ -122,17 +128,6 @@ class VertexTreePanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     
-    private VertexClassNode getVertexClassNode(Class vertexClass) {
-        VertexClassNode vertexClassNode = (VertexClassNode) findNode(vertexClass);
-        if (vertexClassNode == null) {
-            vertexClassNode = new VertexClassNode(vertexClass);
-            ROOT_NODE.add(vertexClassNode);
-            MODEL.nodeStructureChanged(ROOT_NODE);
-        }
-        return vertexClassNode;
-    }
-    
-    
     private DiagramNode findDiagramNode(DiagramComponent diagramComponent) {
         Enumeration en = ROOT_NODE.children();
         while (en.hasMoreElements()) {
@@ -173,7 +168,15 @@ class VertexTreePanel extends javax.swing.JPanel {
         TreePath treePath = new TreePath(pathNodes);
         tree.expandPath(treePath);
     }
-    
+
+
+    private static Cursor createCursor(Image image, String name) {
+        int width = image.getWidth(null);
+        int height = image.getHeight(null);
+        Point center = new Point(width / 2, height / 2);
+        return Toolkit.getDefaultToolkit().createCustomCursor(image, center, name);
+    }
+
     
     private class DiagramNode extends DefaultMutableTreeNode {
     
@@ -186,21 +189,6 @@ class VertexTreePanel extends javax.swing.JPanel {
             return ((DiagramComponent) getUserObject()).getTitle();
         }
     
-    }
-    
-    
-    private class VertexClassNode extends DefaultMutableTreeNode {
-        
-        VertexClassNode(Class vertexClass) {
-            super(vertexClass);
-        }
-        
-        @Override
-        public String toString() {
-            return ((Class) getUserObject()).getSimpleName();
-        }
-        
-
     }
     
     
@@ -234,15 +222,6 @@ class VertexTreePanel extends javax.swing.JPanel {
         DiagramComponent diagramComponent;
         javax.swing.Icon icon;
 
-    }
-    
-    
-    private class VertexNode extends DefaultMutableTreeNode {
-        
-        VertexNode(Vertex vertex) {
-            super(vertex);
-        }
-        
     }
     
     
@@ -281,7 +260,23 @@ class VertexTreePanel extends javax.swing.JPanel {
     
     private class DragInfo {
         
+        VertexPicture picture;
         DiagramComponent diagramComponent;
+
+        Image createImage() {
+            return picture.createImage(16, 14);
+        }
+
+        Image createCannotDropImage() {
+            Image image = createImage();
+            Graphics graphics = image.getGraphics();
+            int width = image.getWidth(null);
+            int height = image.getHeight(null);
+            graphics.setColor(Color.red);
+            graphics.drawLine(0, 0, width, height);
+            return image;
+        }
+
 
     }
     
@@ -294,20 +289,17 @@ class VertexTreePanel extends javax.swing.JPanel {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
             if (node instanceof VertexPictureNode) {
                 dragInfo = new DragInfo();
-                Toolkit toolkit = Toolkit.getDefaultToolkit();
-                VertexPicture picture = (VertexPicture) node.getUserObject();
-                Image image = picture.createImage(16, 14);
-                int width = image.getWidth(VertexTreePanel.this);
-                int height = image.getHeight(VertexTreePanel.this);
-                Cursor cursor = toolkit.createCustomCursor(image, new Point(width/2, height/2), "VertexCursor");
-                VertexTreePanel.this.setCursor(cursor);
+                dragInfo.picture = (VertexPicture) node.getUserObject();
+                Image image = dragInfo.createImage();
+                setCursor(createCursor(image, "DragVertexCursor"));
             }
-
         }
-        
+
         @Override
         public void mouseReleased(java.awt.event.MouseEvent evt) {
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             if (dragInfo != null) {
+                dragInfo.diagramComponent.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
                 if (selectedNode instanceof VertexPictureNode && dragInfo.diagramComponent != null) {
                     VertexPicture selectedPicture = (VertexPicture) selectedNode.getUserObject();
@@ -315,9 +307,7 @@ class VertexTreePanel extends javax.swing.JPanel {
                 }
             }
             dragInfo = null;
-            VertexTreePanel.this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
-        
         
     };
 
@@ -325,7 +315,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     private final GraphEditor graphEditor;
     
     
-    private DragInfo dragInfo = null;
+    private DragInfo dragInfo;
     
 
     private final DefaultMutableTreeNode ROOT_NODE = new DefaultMutableTreeNode();
@@ -336,8 +326,6 @@ class VertexTreePanel extends javax.swing.JPanel {
     private javax.swing.JTree tree;
     // End of variables declaration//GEN-END:variables
 
-    
-    private static final Map<java.lang.Class, javax.swing.Icon> ICONS = new HashMap<java.lang.Class, javax.swing.Icon>();
-
+    private static final Map<java.lang.Class, javax.swing.Icon> ICONS = new HashMap<>();
     
 }

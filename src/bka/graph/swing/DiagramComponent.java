@@ -13,16 +13,12 @@ import javax.swing.*;
 
 
 public class DiagramComponent extends JComponent {
-
-    
-    DiagramComponent(GraphEditor editor) {
-        this.editor = editor;
-        initialize();
-    }
     
     
     DiagramComponent(GraphEditor editor, DiagramPage page) {
-        this(editor);
+        this.editor = editor;
+        this.page = page;
+        initialize();
         setTitle(page.getTitle());
         setVertexPictures(page.getVertices());
         setEdgePictures(page.getEdges());
@@ -30,26 +26,20 @@ public class DiagramComponent extends JComponent {
 
 
     public void addVertexPicture(VertexPicture vertexPicture, Point point) {
-        vertexPicture.init(point);
+        vertexPicture.initializeVertex();
         setVertexLocation(vertexPicture, point);
-        vertexPictureAdded(vertexPicture);
+        addVertexPicture(vertexPicture);
     }
 
 
     public void addEdgePicture(EdgePicture edgePicture) {
-        for (int i = pictures.size() - 1; i >= 0;  --i) {
-            AbstractPicture abstractPicture = pictures.get(i);
-            if (edgePicture.getOriginPicture() == abstractPicture || edgePicture.getTerminusPicture() == abstractPicture) {
-                pictures.add(i, edgePicture);
-                setComponentSize(edgePicture.xEast(), edgePicture.ySouth());
-                break;
-            }
-        }
+        int index = findInsertIndex(edgePicture);
+        pictures.add(index, edgePicture);
     }
-
 
     public final void removeEdgePicture(EdgePicture edgePicture) {
         pictures.remove(edgePicture);
+        page.getEdges().remove(edgePicture);
     }
 
     
@@ -102,13 +92,35 @@ public class DiagramComponent extends JComponent {
     }
     
     
+    boolean contains(AbstractPicture picture) {
+        return pictures.contains(picture);
+    }
+
+
+    void addVertexPictureCopy(VertexPicture vertexPicture, Point locationOnScreen) {
+        if (! pictures.contains(vertexPicture)) {
+            try {
+                Point diagramLocation = getLocationOnScreen();
+                VertexPicture copy = (VertexPicture) vertexPicture.getClass().newInstance();
+                copy.setVertex(vertexPicture.getVertex());
+                copy.setLocation(new Point(locationOnScreen.x - diagramLocation.x, locationOnScreen.y - diagramLocation.y));
+                copy.setSize(new Dimension(vertexPicture.getSize()));
+                addVertexPicture(copy);
+            }
+            catch (IllegalAccessException | InstantiationException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+
     protected final String getTitle() {
-        return title;
+        return page.getTitle();
     }
 
     
     protected final void setTitle(String title) {
-        this.title = title;
+        page.setTitle(title);
     }
 
     
@@ -155,12 +167,6 @@ public class DiagramComponent extends JComponent {
         return highlightedPicture;
     }
     
-
-    protected void addVertex(VertexPicture picture) {
-        pictures.add(picture);
-        setComponentSize(picture.xEast(), picture.ySouth());
-    }
-    
     
     protected VertexPicture findContainer(VertexPicture vertexPicture) {
         int index = pictures.indexOf(vertexPicture);
@@ -197,24 +203,8 @@ public class DiagramComponent extends JComponent {
     protected void setSelected(AbstractPicture picture) {
         selectedPicture = picture;
     }
-    
-    
-    void addVertexPictureCopy(VertexPicture vertexPicture, Point locationOnScreen) {
-        assert(! pictures.contains(vertexPicture));
-        try {
-            Point diagramLocation = getLocationOnScreen();
-            VertexPicture copy = (VertexPicture) vertexPicture.getClass().newInstance();
-            copy.setVertex(vertexPicture.getVertex());
-            copy.setLocation(new Point(locationOnScreen.x - diagramLocation.x, locationOnScreen.y - diagramLocation.y));
-            copy.setSize(new Dimension(vertexPicture.getSize()));
-            vertexPictureAdded(copy);
-        }
-        catch (IllegalAccessException | InstantiationException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    
+
+
     private void initialize() {
         setSize(0, 0);
         addMouseListener(MOUSE_ADAPTER);
@@ -258,8 +248,10 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void vertexPictureAdded(VertexPicture vertexPicture) {
-        addVertex(vertexPicture);
+    private void addVertexPicture(VertexPicture vertexPicture) {
+        pictures.add(vertexPicture);
+        page.getVertices().add(vertexPicture);
+        setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         selectedPicture = vertexPicture;
         repaint();
@@ -370,6 +362,7 @@ public class DiagramComponent extends JComponent {
                 int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
                 if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                     dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
+                    page.getEdges().add(dragInfo.edge);
                     editor.edgePictureAdded(this, dragInfo.edge);
                 }
                 else {
@@ -648,6 +641,17 @@ public class DiagramComponent extends JComponent {
         return all;
     }
 
+
+    private Collection<EdgePicture> allEdgePictures(VertexPicture vertexPicture) {
+        Collection<EdgePicture> all = new ArrayList<>();
+        for (EdgePicture edgePicture : page.getEdges()) {
+            if (edgePicture.getOriginPicture() == vertexPicture || edgePicture.getTerminusPicture() == vertexPicture) {
+                all.add(edgePicture);
+            }
+        }
+        return all;
+    }
+
     
     private void setCursor(int type) {
         if (getCursor().getType() != type) {
@@ -703,6 +707,23 @@ public class DiagramComponent extends JComponent {
     }
     
     
+    /**
+     * @param edgePicture
+     * @return index of last vertex picture from pictures that origin or terminus of edgePicture
+     */
+    private int findInsertIndex(EdgePicture edgePicture) {
+        VertexPicture origin = edgePicture.getOriginPicture();
+        VertexPicture terminus = edgePicture.getTerminusPicture();
+        for (int index = pictures.size() - 1; index >= 0;  --index) {
+            AbstractPicture abstractPicture = pictures.get(index);
+            if (origin == abstractPicture || terminus == abstractPicture) {
+                return index;
+            }
+        }
+        throw new IllegalStateException("No vertex found for edge.");
+    }
+
+
     private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
 
         @Override
@@ -776,40 +797,48 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void keyReleased(KeyEvent evt) {
-            if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-                ArrayList<AbstractPicture> picturesToDelete = new ArrayList<>();
-                for (AbstractPicture picture : pictures) {
-                    if (picture == selectedPicture) {
-                        picturesToDelete.add(picture);
-                        if (picture instanceof VertexPicture) {
-                            editor.vertexPictureRemoved((VertexPicture) picture);
-                        }
-                        else if (picture instanceof EdgePicture) {
-                            editor.edgePictureRemoved((EdgePicture) picture);
-                        }
-                    }
+            if (evt.getKeyCode() == KeyEvent.VK_DELETE && selectedPicture != null) {
+                if (selectedPicture instanceof VertexPicture) {
+                    removeVertex((VertexPicture) selectedPicture);
                 }
-                pictures.removeAll(picturesToDelete);
+                else if (selectedPicture instanceof EdgePicture) {
+                    removeEdge((EdgePicture) selectedPicture);
+                }
+                pictures.remove(selectedPicture);
+                selectedPicture = null;
                 repaint();
             }
-       }
+        }
+
+        private void removeVertex(VertexPicture vertexPicture) {
+            for (EdgePicture edgePicture : allEdgePictures(vertexPicture)) {
+                page.getEdges().remove(edgePicture);
+                editor.vertexPictureRemoved(vertexPicture);
+                pictures.remove(edgePicture);
+            }
+            page.getVertices().remove(vertexPicture);
+            editor.vertexPictureRemoved(vertexPicture);
+        }
+
+        private void removeEdge(EdgePicture edgePicture) {
+            page.getEdges().remove(edgePicture);
+            editor.edgePictureRemoved(edgePicture);
+        }
 
     };
 
-    
-    private GraphEditor editor;
-    private String title;
-
-    private ArrayList<AbstractPicture> pictures = new ArrayList<>();
+    private final GraphEditor editor;
+    private final DiagramPage page;
+    private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
 
     private AbstractPicture selectedPicture = null;
 
-    private DragInfo dragInfo = null;     
-    private HoverInfo hoverInfo = null;
+    private DragInfo dragInfo;     
+    private HoverInfo hoverInfo;
     
-    private VertexPicture highlightedPicture = null;
+    private VertexPicture highlightedPicture;
 
-    private Point attachmentPoint = null;
+    private Point attachmentPoint;
     
     private final Color attachmentPointColor = Color.RED;
     private final int attachmentPointWidth = 4;

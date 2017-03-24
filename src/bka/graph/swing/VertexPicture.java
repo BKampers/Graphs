@@ -182,8 +182,7 @@ public class VertexPicture extends AbstractPicture {
     
     
     // This class is public but can only initialized from within its package.
-    final void init(Point location) {
-        setLocation(location);
+    final void initializeVertex() {
         vertex = createVertex();
     }
     

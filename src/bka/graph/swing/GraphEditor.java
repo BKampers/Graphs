@@ -173,13 +173,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    protected void addVertex(VertexPicture picture) {
-        DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        selected.addVertex(picture);
-    }
-        
-        
     protected VertexPicture getVertexPicture(Vertex vertex) {
         DiagramComponent selected = selectedDiagramComponent();
         assert selected != null;
@@ -424,7 +417,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     private void newDiagramMenuItem_actionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDiagramMenuItem_actionPerformed
         int index = diagramTabbedPane.getSelectedIndex() + 1;
-        addDiagramTab(new DiagramComponent(this), index);
+        addDiagramTab(new DiagramComponent(this, DiagramPage.createEmpty()), index);
         diagramTabbedPane.setSelectedIndex(index);
         renameDiagram();
     }//GEN-LAST:event_newDiagramMenuItem_actionPerformed
