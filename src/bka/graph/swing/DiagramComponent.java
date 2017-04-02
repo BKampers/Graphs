@@ -827,6 +827,7 @@ public class DiagramComponent extends JComponent {
 
     };
 
+    
     private final GraphEditor editor;
     private final DiagramPage page;
     private final ArrayList<AbstractPicture> pictures = new ArrayList<>();

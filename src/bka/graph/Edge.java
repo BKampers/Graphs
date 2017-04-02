@@ -19,38 +19,38 @@ public class Edge {
     }
     
     
-    public void init(Vertex origin, Vertex terminus) {
+    public final void init(Vertex origin, Vertex terminus) {
         this.origin = origin;
         this.terminus = terminus;
     }
     
     
-    public Vertex getOrigin() {
+    public final Vertex getOrigin() {
         return origin;
     }
     
     
-    public void setOrigin(Vertex vertex) {
+    public final void setOrigin(Vertex vertex) {
         origin = vertex;
     }
     
     
-    public Vertex getTerminus() {
+    public final Vertex getTerminus() {
         return terminus;
     }
     
     
-    public void setTerminus(Vertex vertex) {
+    public final void setTerminus(Vertex vertex) {
         terminus = vertex;
     }
     
     
-    public boolean isDirected() {
+    public final boolean isDirected() {
         return directed;
     }
     
     
-    public void setDirected(boolean directed) {
+    public final void setDirected(boolean directed) {
         this.directed = directed;
     }
     
