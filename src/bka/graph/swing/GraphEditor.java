@@ -417,9 +417,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     private void newDiagramMenuItem_actionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDiagramMenuItem_actionPerformed
         int index = diagramTabbedPane.getSelectedIndex() + 1;
-        addDiagramTab(new DiagramComponent(this, DiagramPage.createEmpty()), index);
+        DiagramPage page = DiagramPage.createEmpty();
+        addDiagramTab(new DiagramComponent(this, page), index);
         diagramTabbedPane.setSelectedIndex(index);
         renameDiagram();
+        book.addPage(page);
     }//GEN-LAST:event_newDiagramMenuItem_actionPerformed
 
     
@@ -574,20 +576,20 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    private ArrayList<DiagramPage> getDiagramPages() {
-        ArrayList<DiagramPage> pages = new ArrayList<>();
-        int count = diagramTabbedPane.getTabCount();
-        for (int i = 0; i < count; ++i) {
-            DiagramPage page = new DiagramPage();
-            JScrollPane pane = (JScrollPane) diagramTabbedPane.getComponentAt(i);
-            DiagramComponent component = diagramComponent(pane);
-            page.setTitle(diagramTabbedPane.getTitleAt(i));
-            page.setVertices(((DiagramComponent) component).getVertexPictures());
-            page.setEdges(((DiagramComponent) component).getEdgePictures());
-            pages.add(page);
-        }
-        return pages;
-    }
+//    private ArrayList<DiagramPage> getDiagramPages() {
+//        ArrayList<DiagramPage> pages = new ArrayList<>();
+//        int count = diagramTabbedPane.getTabCount();
+//        for (int i = 0; i < count; ++i) {
+//            DiagramPage page = new DiagramPage();
+//            JScrollPane pane = (JScrollPane) diagramTabbedPane.getComponentAt(i);
+//            DiagramComponent component = diagramComponent(pane);
+//            page.setTitle(diagramTabbedPane.getTitleAt(i));
+//            page.setVertices(((DiagramComponent) component).getVertexPictures());
+//            page.setEdges(((DiagramComponent) component).getEdgePictures());
+//            pages.add(page);
+//        }
+//        return pages;
+//    }
     
     
     private void updateFileStatus() {
