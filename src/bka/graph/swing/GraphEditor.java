@@ -401,8 +401,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
  
     private void diagramTabbedPane_mouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_diagramTabbedPane_mouseClicked
+        int index = diagramTabbedPane.getSelectedIndex();
+        book.setPageIndex(index);
         if (evt.getButton() == MouseEvent.BUTTON3 && evt.getClickCount() == 1) {
-            int index = diagramTabbedPane.getSelectedIndex();
             diagramMoveLeftMenuItem.setEnabled(0 < index);
             diagramMoveRightMenuItem.setEnabled(index < diagramTabbedPane.getTabCount() - 1);
             diagramPopupMenu.show(this, evt.getX(), evt.getY());
@@ -422,6 +423,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         diagramTabbedPane.setSelectedIndex(index);
         renameDiagram();
         book.addPage(page);
+        book.setPageIndex(index);
     }//GEN-LAST:event_newDiagramMenuItem_actionPerformed
 
     
@@ -574,22 +576,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
             JOptionPane.showMessageDialog(this, "Error saving '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    
-//    private ArrayList<DiagramPage> getDiagramPages() {
-//        ArrayList<DiagramPage> pages = new ArrayList<>();
-//        int count = diagramTabbedPane.getTabCount();
-//        for (int i = 0; i < count; ++i) {
-//            DiagramPage page = new DiagramPage();
-//            JScrollPane pane = (JScrollPane) diagramTabbedPane.getComponentAt(i);
-//            DiagramComponent component = diagramComponent(pane);
-//            page.setTitle(diagramTabbedPane.getTitleAt(i));
-//            page.setVertices(((DiagramComponent) component).getVertexPictures());
-//            page.setEdges(((DiagramComponent) component).getEdgePictures());
-//            pages.add(page);
-//        }
-//        return pages;
-//    }
     
     
     private void updateFileStatus() {
