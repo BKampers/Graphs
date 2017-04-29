@@ -25,21 +25,27 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    public void addVertexPicture(VertexPicture vertexPicture, Point point) {
+    public final void addVertexPicture(VertexPicture vertexPicture, Point point) {
         vertexPicture.initializeVertex();
         setVertexLocation(vertexPicture, point);
         addVertexPicture(vertexPicture);
     }
 
 
-    public void addEdgePicture(EdgePicture edgePicture) {
+    public final void removeVertexPicture(VertexPicture vertexPicture) {
+        pictures.remove(vertexPicture);
+        page.remove(vertexPicture);
+    }
+
+
+    public final void addEdgePicture(EdgePicture edgePicture) {
         int index = findInsertIndex(edgePicture);
         pictures.add(index, edgePicture);
     }
 
     public final void removeEdgePicture(EdgePicture edgePicture) {
         pictures.remove(edgePicture);
-        page.getEdges().remove(edgePicture);
+        page.remove(edgePicture);
     }
 
     
@@ -111,6 +117,23 @@ public class DiagramComponent extends JComponent {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+
+    void removeVertex(VertexPicture vertexPicture) {
+        for (EdgePicture edgePicture : allEdgePictures(vertexPicture)) {
+            page.getEdges().remove(edgePicture);
+            editor.vertexPictureRemoved(vertexPicture);
+            pictures.remove(edgePicture);
+        }
+        page.remove(vertexPicture);
+        editor.vertexPictureRemoved(vertexPicture);
+    }
+
+    
+    void removeEdge(EdgePicture edgePicture) {
+        page.getEdges().remove(edgePicture);
+        editor.edgePictureRemoved(edgePicture);
     }
 
 
@@ -202,6 +225,7 @@ public class DiagramComponent extends JComponent {
     
     protected void setSelected(AbstractPicture picture) {
         selectedPicture = picture;
+        repaint();
     }
 
 
@@ -250,7 +274,7 @@ public class DiagramComponent extends JComponent {
 
     private void addVertexPicture(VertexPicture vertexPicture) {
         pictures.add(vertexPicture);
-        page.getVertices().add(vertexPicture);
+        page.add(vertexPicture);
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         selectedPicture = vertexPicture;
@@ -362,7 +386,7 @@ public class DiagramComponent extends JComponent {
                 int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
                 if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                     dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
-                    page.getEdges().add(dragInfo.edge);
+                    page.add(dragInfo.edge);
                     editor.edgePictureAdded(this, dragInfo.edge);
                 }
                 else {
@@ -808,21 +832,6 @@ public class DiagramComponent extends JComponent {
                 selectedPicture = null;
                 repaint();
             }
-        }
-
-        private void removeVertex(VertexPicture vertexPicture) {
-            for (EdgePicture edgePicture : allEdgePictures(vertexPicture)) {
-                page.getEdges().remove(edgePicture);
-                editor.vertexPictureRemoved(vertexPicture);
-                pictures.remove(edgePicture);
-            }
-            page.getVertices().remove(vertexPicture);
-            editor.vertexPictureRemoved(vertexPicture);
-        }
-
-        private void removeEdge(EdgePicture edgePicture) {
-            page.getEdges().remove(edgePicture);
-            editor.edgePictureRemoved(edgePicture);
         }
 
     };

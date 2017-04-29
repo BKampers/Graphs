@@ -33,26 +33,46 @@ public class DiagramPage {
 
     
     public Collection<VertexPicture> getVertices() {
-        return vertices;
+        return (vertices != null) ? new ArrayList<>(vertices) : null;
     }
 
     
     public void setVertices(Collection<VertexPicture> vertices) {
-        this.vertices = vertices;
+        this.vertices = (vertices != null) ? new ArrayList<>(vertices) : null;
     }
 
-    
+
     public Collection<EdgePicture> getEdges() {
-        return edges;
+        return (edges != null) ? new ArrayList<>(edges) : null;
     }
 
     
     public void setEdges(Collection<EdgePicture> edges) {
-        this.edges = edges;
+        this.edges = (edges != null) ? new ArrayList<>(edges) : null;
     }
     
     
-    public VertexPicture findContainer(VertexPicture vertex) {
+    void add(VertexPicture vertex) {
+        vertices.add(vertex);
+    }
+
+
+    void remove(VertexPicture vertex) {
+        vertices.remove(vertex);
+    }
+
+
+    void add(EdgePicture edge) {
+        edges.add(edge);
+    }
+
+
+    void remove(EdgePicture edge) {
+        edges.remove(edge);
+    }
+
+
+    VertexPicture findContainer(VertexPicture vertex) {
         for (VertexPicture picture : vertices) {
             if (vertex != picture && picture.isLocatedAt(vertex.getLocation())) {
                 return picture;

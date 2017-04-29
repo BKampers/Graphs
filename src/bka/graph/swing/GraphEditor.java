@@ -240,16 +240,14 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    DiagramComponent findDiagramComponent(VertexPicture vertexPicture) {
-        int count = diagramTabbedPane.getTabCount();
-        for (int i = 0; i < count; ++i) {
-            DiagramComponent component = diagramComponent(i);
-            if (component.getVertexPictures().contains(vertexPicture)) {
-                return component;
-            }
+
+    void setSelected(DiagramComponent diagramComponent) {
+        int index = indexOf(diagramComponent);
+        if (index >= 0) {
+            diagramTabbedPane.setSelectedIndex(index);
         }
-        return null;
     }
+
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -525,7 +523,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     private void createEmptyBook() {
         diagramTabbedPane.removeAll();
-        DiagramPage page = new DiagramPage();
+        book = new Book(getPersistenceDelegates());
+        DiagramPage page = DiagramPage.createEmpty();
         book.addPage(page);
         addDiagramTab(new DiagramComponent(this, page));
         resetDiagramFile();
@@ -594,6 +593,18 @@ public class GraphEditor extends bka.swing.FrameApplication {
         if (diagramFile != null && ! diagramFile.isDirectory()) {
             diagramFile = diagramFile.getParentFile();
         }
+    }
+
+
+    private int indexOf (DiagramComponent diagramComponent) {
+        int count = diagramTabbedPane.getTabCount();
+        for (int index = 0; index < count; ++index) {
+            DiagramComponent component = diagramComponent(index);
+            if (component == diagramComponent) {
+                return index;
+            }
+        }
+        return -1;
     }
     
     

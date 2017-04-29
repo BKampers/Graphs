@@ -8,6 +8,7 @@ package bka.graph.swing;
 
 import bka.graph.Vertex;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import javax.swing.tree.*;
 
@@ -20,6 +21,7 @@ class VertexTreePanel extends javax.swing.JPanel {
         initComponents();
         tree.setCellRenderer(new CellRenderer());
         tree.addMouseListener(MOUSE_ADAPTER);
+        tree.addKeyListener(KEY_ADAPTER);
     }
     
     
@@ -42,7 +44,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     }
     
     
-    void diagramEntered(java.awt.event.MouseEvent evt) {
+    void diagramEntered(MouseEvent evt) {
         if (dragInfo != null) {
             dragInfo.diagramComponent = (DiagramComponent) evt.getComponent();
             boolean cannotDrop = dragInfo.diagramComponent.contains(dragInfo.picture);
@@ -258,6 +260,13 @@ class VertexTreePanel extends javax.swing.JPanel {
     }
     
     
+    private DefaultMutableTreeNode getSelectedNode() {
+        TreePath path = tree.getSelectionPath();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        return node;
+    }
+
+
     private class DragInfo {
         
         VertexPicture picture;
@@ -281,37 +290,78 @@ class VertexTreePanel extends javax.swing.JPanel {
     }
     
     
-    private final java.awt.event.MouseAdapter MOUSE_ADAPTER = new java.awt.event.MouseAdapter() {
+    private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
         
         @Override
-        public void mousePressed(java.awt.event.MouseEvent evt) {
-            TreePath path = tree.getPathForLocation(evt.getX(), evt.getY());
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            if (node instanceof VertexPictureNode) {
-                dragInfo = new DragInfo();
-                dragInfo.picture = (VertexPicture) node.getUserObject();
-                Image image = dragInfo.createImage();
-                setCursor(createCursor(image, "DragVertexCursor"));
+        public void mousePressed(MouseEvent evt) {
+            if (evt.getClickCount() == 1) {
+                DefaultMutableTreeNode node = getSelectedNode();
+                if (node instanceof VertexPictureNode) {
+                    startPictureDrag(node);
+                }
             }
         }
 
         @Override
-        public void mouseReleased(java.awt.event.MouseEvent evt) {
+        public void mouseReleased(MouseEvent evt) {
+            if (evt.getClickCount() == 1) {
+                finishDrag(evt.getLocationOnScreen());
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            if (evt.getClickCount() == 2) {
+                selectPictureInDiagram(getSelectedNode());
+            }
+        }
+
+        private void startPictureDrag(DefaultMutableTreeNode node) {
+            dragInfo = new DragInfo();
+            dragInfo.picture = (VertexPicture) node.getUserObject();
+            Image image = dragInfo.createImage();
+            setCursor(createCursor(image, "DragVertexCursor"));
+        }
+       
+        private void finishDrag(Point locationOnScreen) {
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            if (dragInfo != null) {
+            if (dragInfo != null && dragInfo.diagramComponent != null) {
                 dragInfo.diagramComponent.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
-                if (selectedNode instanceof VertexPictureNode && dragInfo.diagramComponent != null) {
+                DefaultMutableTreeNode selectedNode = getSelectedNode();
+                if (selectedNode instanceof VertexPictureNode) {
                     VertexPicture selectedPicture = (VertexPicture) selectedNode.getUserObject();
-                    dragInfo.diagramComponent.addVertexPictureCopy(selectedPicture, evt.getLocationOnScreen());
+                    dragInfo.diagramComponent.addVertexPictureCopy(selectedPicture, locationOnScreen);
                 }
             }
             dragInfo = null;
         }
-        
+
+        private void selectPictureInDiagram(DefaultMutableTreeNode node) {
+            DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+            DiagramComponent diagramComponent = (DiagramComponent) parent.getUserObject();
+            diagramComponent.setSelected((AbstractPicture) node.getUserObject());
+            graphEditor.setSelected((DiagramComponent) parent.getUserObject());
+        }
+
     };
 
-    
+
+    private final KeyAdapter KEY_ADAPTER = new KeyAdapter() {
+
+        @Override
+        public void keyReleased(KeyEvent evt) {
+            if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
+                DefaultMutableTreeNode node = getSelectedNode();
+                if (node.getUserObject() instanceof VertexPicture) {
+                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+                    DiagramComponent diagramComponent = (DiagramComponent) parent.getUserObject();
+                    diagramComponent.removeVertex((VertexPicture) node.getUserObject());
+                }
+            }
+        }
+    };
+
+
     private final GraphEditor graphEditor;
     
     
