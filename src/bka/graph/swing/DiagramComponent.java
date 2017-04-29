@@ -225,7 +225,6 @@ public class DiagramComponent extends JComponent {
     
     protected void setSelected(AbstractPicture picture) {
         selectedPicture = picture;
-        repaint();
     }
 
 
