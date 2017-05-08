@@ -43,7 +43,7 @@
         <Component class="javax.swing.JTree" name="tree">
           <Properties>
             <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="MODEL" type="code"/>
+              <Connection code="treeModel" type="code"/>
             </Property>
             <Property name="rootVisible" type="boolean" value="false"/>
           </Properties>

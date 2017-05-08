@@ -26,17 +26,17 @@ class VertexTreePanel extends javax.swing.JPanel {
     
     
     void rebuild() {
-        ROOT_NODE.removeAllChildren();
+        rootNode.removeAllChildren();
         for (DiagramComponent diagramComponent : graphEditor.getDiagramComponents()) {
             DiagramNode diagramNode = new DiagramNode(diagramComponent);
-            ROOT_NODE.add(diagramNode);
+            rootNode.add(diagramNode);
             for (VertexPicture vertexPicture : diagramComponent.getVertexPictures()) {
                 VertexPictureNode vertexPictureNode = new VertexPictureNode(vertexPicture, diagramComponent);
                 diagramNode.add(vertexPictureNode);
             }
         }
-        MODEL.nodeStructureChanged(ROOT_NODE);
-        Enumeration en = ROOT_NODE.children();
+        treeModel.nodeStructureChanged(rootNode);
+        Enumeration en = rootNode.children();
         while (en.hasMoreElements()) {
             DiagramNode diagramNode = (DiagramNode) en.nextElement();
             expand(diagramNode);
@@ -67,7 +67,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     void diagramModified(DiagramComponent diagramComponent) {
         DiagramNode diagramNode = findDiagramNode(diagramComponent);
         if (diagramNode != null) {
-            MODEL.nodeChanged(diagramNode);
+            treeModel.nodeChanged(diagramNode);
         }
     }
     
@@ -76,7 +76,7 @@ class VertexTreePanel extends javax.swing.JPanel {
         DefaultMutableTreeNode parentNode = findNode(diagramComponent);
         VertexPictureNode vertexNode = new VertexPictureNode(vertexPicture, diagramComponent);
         parentNode.add(vertexNode);
-        MODEL.nodeStructureChanged(parentNode);
+        treeModel.nodeStructureChanged(parentNode);
         expand(parentNode);
     }
     
@@ -84,7 +84,7 @@ class VertexTreePanel extends javax.swing.JPanel {
     void vertexModified(VertexPicture vertexPicture) {
         DefaultMutableTreeNode vertexNode = findNode(vertexPicture);
         if (vertexNode != null) {
-            MODEL.nodeChanged(vertexNode);
+            treeModel.nodeChanged(vertexNode);
         }
     }
     
@@ -94,7 +94,7 @@ class VertexTreePanel extends javax.swing.JPanel {
         if (vertexPictureNode != null) {
             TreeNode parent = vertexPictureNode.getParent();
             vertexPictureNode.removeFromParent();
-            MODEL.nodeStructureChanged(parent);
+            treeModel.nodeStructureChanged(parent);
         }
     }
     
@@ -113,7 +113,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
         setMinimumSize(new java.awt.Dimension(200, 300));
 
-        tree.setModel(MODEL);
+        tree.setModel(treeModel);
         tree.setRootVisible(false);
         scrollPane.setViewportView(tree);
 
@@ -131,7 +131,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
     
     private DiagramNode findDiagramNode(DiagramComponent diagramComponent) {
-        Enumeration en = ROOT_NODE.children();
+        Enumeration en = rootNode.children();
         while (en.hasMoreElements()) {
             DiagramNode node = (DiagramNode) en.nextElement();
             if (node.getUserObject() == diagramComponent) {
@@ -143,7 +143,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
     
     private DefaultMutableTreeNode findNode(Object userObject) {
-        return findNode(userObject, ROOT_NODE);
+        return findNode(userObject, rootNode);
     }
     
     
@@ -368,8 +368,8 @@ class VertexTreePanel extends javax.swing.JPanel {
     private DragInfo dragInfo;
     
 
-    private final DefaultMutableTreeNode ROOT_NODE = new DefaultMutableTreeNode();
-    private final DefaultTreeModel MODEL = new DefaultTreeModel(ROOT_NODE);
+    private final DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode();
+    private final DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
