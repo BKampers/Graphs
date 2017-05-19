@@ -122,7 +122,7 @@ public class DiagramComponent extends JComponent {
 
     void removeVertex(VertexPicture vertexPicture) {
         for (EdgePicture edgePicture : allEdgePictures(vertexPicture)) {
-            page.getEdges().remove(edgePicture);
+            page.remove(edgePicture);
             editor.vertexPictureRemoved(vertexPicture);
             pictures.remove(edgePicture);
         }
@@ -132,7 +132,7 @@ public class DiagramComponent extends JComponent {
 
     
     void removeEdge(EdgePicture edgePicture) {
-        page.getEdges().remove(edgePicture);
+        page.remove(edgePicture);
         editor.edgePictureRemoved(edgePicture);
     }
 
@@ -250,9 +250,9 @@ public class DiagramComponent extends JComponent {
             setSelected(vertexPicture);
         }
         else {
-            vertexPanel = vertexPicture.getEditPanel();
-            if (vertexPanel != null) {
-                openDialog(vertexPicture.vertex);
+            editPanel = vertexPicture.getEditPanel();
+            if (editPanel != null) {
+                openDialog(vertexDialogTitle(vertexPicture.getVertex()));
                 editor.vertexPictureModified(vertexPicture);
             }                
         }
@@ -320,8 +320,17 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void edgePictureClicked(EdgePicture edgePicture) {
-        setSelected(edgePicture);
+    private void edgePictureClicked(EdgePicture edgePicture, int count) {
+        if (count == 1) {
+            setSelected(edgePicture);
+        }
+        else {
+            editPanel = edgePicture.getEditPanel();
+            if (editPanel != null) {
+                openDialog(edgeDialogTitle(edgePicture.getEdge()));
+                editor.edgePictureModified(edgePicture);
+            }
+        }
     }
     
     
@@ -512,23 +521,30 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void openDialog(Vertex vertex) {
-        vertexPanel.setEnvironment(editor); 
-        String dialogTitle = vertex.getClass().getName();
-        int nameIndex = dialogTitle.lastIndexOf('.') + 1;
-        if (0 < nameIndex && nameIndex < dialogTitle.length()) {
-            dialogTitle = dialogTitle.substring(nameIndex);
-        }
-        String name = vertex.getName();
-        if (name != null) {
-            dialogTitle += ": " + name;
-        }
-        EditDialog dialog = new EditDialog(editor, dialogTitle, vertexPanel);
+    private void openDialog(String dialogTitle) {
+        editPanel.setEnvironment(editor);
+        EditDialog dialog = new EditDialog(editor, dialogTitle, editPanel);
         dialog.setVisible(true);
         repaint(); // Any picture might be changed, repaint entire diagram.
     }
-    
-    
+
+
+    private String vertexDialogTitle(Vertex vertex) {
+        StringBuilder title = new StringBuilder(vertex.getClass().getSimpleName());
+        String name = vertex.getName();
+        if (name != null) {
+            title .append(": ");
+            title.append(name);
+        }
+        return title.toString();
+    }
+
+
+    private String edgeDialogTitle(Edge edge) {
+        return edge.getClass().getSimpleName();
+    }
+
+
     private void diagramClicked(int count, Point point) {
         Class vertexPictureClass = editor.selectedVertexPictureClass();
         if (count == 1 && vertexPictureClass != null) {
@@ -537,7 +553,7 @@ public class DiagramComponent extends JComponent {
         else {
             EdgePicture edgePicture = getEdgePicture(point);
             if (edgePicture != null) {
-                edgePictureClicked(edgePicture);
+                edgePictureClicked(edgePicture, count);
             }
             else {
                 VertexPicture vertexPicture = getVertexPicture(point);
@@ -853,6 +869,6 @@ public class DiagramComponent extends JComponent {
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;
     
-    private AbstractEditPanel vertexPanel;    
+    private AbstractEditPanel editPanel;
 
 }

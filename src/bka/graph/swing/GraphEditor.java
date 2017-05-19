@@ -154,6 +154,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
     protected void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture edgePicture) {
     }
 
+    protected void edgePictureModified(EdgePicture edgePicture) {
+    }
+
 
     protected void edgePictureRemoved(EdgePicture edgePicture) {
     }

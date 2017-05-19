@@ -87,6 +87,7 @@ public class EdgePicture extends AbstractPicture {
     }
    
     
+    @Override
     public void paint(Graphics2D g2d) {
         g2d.setStroke(stroke);
         g2d.setColor(drawColor);
@@ -115,6 +116,7 @@ public class EdgePicture extends AbstractPicture {
     }
 
     
+    @Override
     public boolean isLocatedAt(Point point) {
         return indexNear(point) != NO_INDEX;
     }
@@ -246,17 +248,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-//    @Override
-//    protected Rectangle rectangle() {
-//        Rectangle rectangle = super.rectangle();
-//        rectangle.x -= 10;
-//        rectangle.y -= 10;
-//        rectangle.width += 20;
-//        rectangle.height += 20;
-//        return rectangle;
-//    }
-    
-    
+    @Override
     protected final int yNorth() {
         int northMost = Integer.MAX_VALUE;
         for (int y : yPoints) {
@@ -266,6 +258,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
 
+    @Override
     protected final int ySouth() {
         int southMost = Integer.MIN_VALUE;
         for (int y : yPoints) {
@@ -275,6 +268,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
 
+    @Override
     protected final int xWest() {
         int westMost = Integer.MAX_VALUE;
         for (int x : xPoints) {
@@ -284,6 +278,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
 
+    @Override
     protected final int xEast() {
         int eastMost = Integer.MIN_VALUE;
         for (int x : xPoints) {
@@ -332,6 +327,11 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
+    protected AbstractEditPanel getEditPanel() {
+        return null;
+    }
+
+
     protected void paintArrowhead(Graphics2D g2d) {
         int[] xCoordinates = {-5, 0,  5};
         int[] yCoordinates = {-5, 5, -5};
@@ -531,9 +531,9 @@ public class EdgePicture extends AbstractPicture {
    }
     
     
-    private Edge edge = null;
-    private VertexPicture originPicture = null; 
-    private VertexPicture terminusPicture = null;
+    protected Edge edge = null;
+    protected VertexPicture originPicture = null;
+    protected VertexPicture terminusPicture = null;
     
     private Point dragPoint = null;
     private int dragIndex = NO_INDEX;
