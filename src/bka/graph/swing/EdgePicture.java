@@ -7,6 +7,7 @@ package bka.graph.swing;
 
 import bka.graph.*;
 import java.awt.*;
+import java.awt.geom.*;
 import java.util.logging.*;
 
 
@@ -108,6 +109,7 @@ public class EdgePicture extends AbstractPicture {
             g2d.setColor(Color.BLACK);
             g2d.drawOval(xPoints[hoverIndex] - 2, yPoints[hoverIndex] - 2, 5, 5);
         }
+        paintText(g2d);
     }
         
 
@@ -154,6 +156,11 @@ public class EdgePicture extends AbstractPicture {
     
     public final void setTerminus(VertexPicture terminusPicture, Point point) {
         setTerminus(terminusPicture, terminusPicture.nearestAttachmentIndex(point));
+    }
+
+
+    protected String getText() {
+        return null;
     }
     
     
@@ -336,6 +343,21 @@ public class EdgePicture extends AbstractPicture {
         int[] xCoordinates = {-5, 0,  5};
         int[] yCoordinates = {-5, 5, -5};
         g2d.fillPolygon(xCoordinates, yCoordinates, xCoordinates.length);
+    }
+
+
+    protected void paintText(Graphics2D g2d) {
+        String text = getText();
+        if (text != null && ! text.isEmpty()) {
+            int left = Math.min(xPoints[0], xPoints[xPoints.length - 1]);
+            int right = Math.max(xPoints[0], xPoints[xPoints.length - 1]);
+            int top = Math.min(yPoints[0], yPoints[yPoints.length - 1]);
+            int bottom = Math.max(yPoints[0], yPoints[yPoints.length - 1]);
+            Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, null);
+            float x = left + (right - left) / 2.0f - (float) bounds.getCenterX();
+            float y = top + (bottom - top) / 2.0f - (float) bounds.getCenterY();
+            g2d.drawString(text, x, y);
+        }
     }
     
     
