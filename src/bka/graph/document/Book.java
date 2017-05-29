@@ -2,9 +2,10 @@
 ** Copyright © Bart Kampers
 */
 
-package bka.graph.swing;
+package bka.graph.document;
 
 import bka.graph.*;
+import bka.graph.swing.*;
 import java.beans.*;
 import java.io.*;
 import java.util.*;

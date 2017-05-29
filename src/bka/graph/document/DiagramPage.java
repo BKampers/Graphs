@@ -2,8 +2,9 @@
 ** Copyright © Bart Kampers
 */
 
-package bka.graph.swing;
+package bka.graph.document;
 
+import bka.graph.swing.*;
 import java.util.*;
 
 
@@ -52,22 +53,22 @@ public class DiagramPage {
     }
     
     
-    void add(VertexPicture vertex) {
+    public void add(VertexPicture vertex) {
         vertices.add(vertex);
     }
 
 
-    void remove(VertexPicture vertex) {
+    public void remove(VertexPicture vertex) {
         vertices.remove(vertex);
     }
 
 
-    void add(EdgePicture edge) {
+    public void add(EdgePicture edge) {
         edges.add(edge);
     }
 
 
-    void remove(EdgePicture edge) {
+    public void remove(EdgePicture edge) {
         edges.remove(edge);
     }
 

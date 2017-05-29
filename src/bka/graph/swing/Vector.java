@@ -1,8 +1,3 @@
-/*
-** Copyright © Bart Kampers
-*/
-
-
 package bka.graph.swing;
 
 
@@ -34,7 +29,6 @@ class Vector {
 
     
     void add(Vector other) {
-        assert other != null;
         x += other.x;
         y += other.y;
     }

@@ -4,6 +4,7 @@
 
 package bka.graph.swing;
 
+import bka.graph.document.*;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.event.*;
