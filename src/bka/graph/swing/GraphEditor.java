@@ -4,6 +4,7 @@
 
 package bka.graph.swing;
 
+import bka.awt.*;
 import bka.graph.document.*;
 import bka.graph.*;
 import java.awt.*;
@@ -61,10 +62,16 @@ public class GraphEditor extends bka.swing.FrameApplication {
     public String manufacturerName() {
         return "BartK";
     }
-    
+
 
     public static void main(final String[] arguments) {
         EventQueue.invokeLater(() -> {
+            DrawStyle drawStyle = new DrawStyle();
+            drawStyle.setPaint(AbstractPicture.FILL, Color.BLACK);
+            drawStyle.setPaint(AbstractPicture.DRAW, Color.BLACK);
+            drawStyle.setStroke(AbstractPicture.DRAW, new BasicStroke());
+            drawStyle.setStroke(EdgePicture.ARROW_HEAD, new BasicStroke());
+            DrawStyleManager.getInstance().setDrawStyle(AbstractPicture.class, drawStyle);
             GraphEditor frame = new GraphEditor();
 //                frame.initialize(arguments);
             frame.setVisible(true);
@@ -163,20 +170,24 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    protected void setHighlighted(VertexPicture picture) {
+    protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
         DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        selected.setHighlighted(picture);
+        selected.setHighlighted(picture, drawStyle);
     }
-    
-    
-    protected VertexPicture getHighlighted() {
+
+
+    protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
         DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        return selected.getHighlighted();
+        selected.resetHighlighted(picture, drawStyle);
     }
-    
-    
+
+
+    protected void resetHighlighted(DrawStyle drawStyle) {
+        DiagramComponent selected = selectedDiagramComponent();
+        selected.resetHighlighted(drawStyle);
+    }
+
+
     protected VertexPicture getVertexPicture(Vertex vertex) {
         DiagramComponent selected = selectedDiagramComponent();
         assert selected != null;
@@ -191,11 +202,13 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     protected JPopupMenu getEdgeMenu(final EdgePicture picture) {
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem colorItem = new JMenuItem("Color");
-        colorItem.addActionListener((ActionEvent evt) -> {
-            modifyColor(picture);
-        });
-        menu.add(colorItem);
+        for (String paintKey : picture.getConfigurablePaints()) {
+            JMenuItem colorItem = new JMenuItem("Color: " + paintKey);
+            colorItem.addActionListener((ActionEvent evt) -> {
+                modifyColor(picture, paintKey);
+            });
+            menu.add(colorItem);
+        }
         return menu;
     }
 
@@ -516,10 +529,20 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
     
-    private void modifyColor(AbstractPicture picture) {
-        Color color = JColorChooser.showDialog(this, "Pick Color", picture.getDrawColor());
+    private void modifyColor(AbstractPicture picture, Object key) {
+        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
+        Color color = null;
+        if (drawStyle != null) {
+            Paint paint = drawStyle.getPaint(key);
+            if (paint instanceof Color) {
+                color = (Color) paint;
+            }
+        }
+        Color newColor = JColorChooser.showDialog(this, "Pick Color", color);
         if (color != null) {
-            picture.setDrawColor(color);
+            drawStyle = new DrawStyle(drawStyle);
+            drawStyle.setPaint(key, newColor);
+            DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
         }
         selectedDiagramComponent().clearHoverInfo();
     }

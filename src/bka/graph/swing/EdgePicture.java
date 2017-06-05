@@ -5,6 +5,7 @@
 package bka.graph.swing;
 
 
+import bka.awt.*;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -13,7 +14,9 @@ import java.util.logging.*;
 
 public class EdgePicture extends AbstractPicture {
 
-    
+    public static final String ARROW_HEAD = "ARROW_HEAD";
+
+
     public EdgePicture() {
     }
     
@@ -90,14 +93,14 @@ public class EdgePicture extends AbstractPicture {
     
     @Override
     public void paint(Graphics2D g2d) {
-        g2d.setStroke(stroke);
-        g2d.setColor(drawColor);
-        g2d.drawPolyline(xPoints, yPoints, getPointCount());
+        super.paint(g2d);
         if (edge == null || edge.isDirected()) {
             int index = arrowHeadLineIndex();
             double angle = angle(index);
             Point location = arrowheadLocation();
             if (location != null) {
+                DrawStyle style = DrawStyleManager.getInstance().getDrawStyle(this);
+                g2d.setStroke(style.getStroke(ARROW_HEAD));
                 g2d.translate(location.x, location.y);
                 g2d.rotate(angle);
                 paintArrowhead(g2d);
@@ -110,6 +113,23 @@ public class EdgePicture extends AbstractPicture {
             g2d.drawOval(xPoints[hoverIndex] - 2, yPoints[hoverIndex] - 2, 5, 5);
         }
         paintText(g2d);
+    }
+
+
+    @Override
+    public Shape getShape() {
+        Path2D.Float path = new Path2D.Float();
+        path.moveTo(xPoints[0], yPoints[0]);
+        for (int i = 1; i < xPoints.length; ++i) {
+            path.lineTo(xPoints[i], yPoints[i]);
+        }
+        return path;
+    }
+
+
+    @Override
+    public String[] getConfigurablePaints() {
+        return new String[] { AbstractPicture.DRAW };
     }
         
 
@@ -124,7 +144,17 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final void setOrigin(VertexPicture originPicture, int originAttachmentIndex) {
+    public final void setOrigin(VertexPicture originPicture, Point point) {
+        setOrigin(originPicture, originPicture.nearestAttachmentIndex(point));
+    }
+    
+    
+    public final void setTerminus(VertexPicture terminusPicture, Point point) {
+        setTerminus(terminusPicture, terminusPicture.nearestAttachmentIndex(point));
+    }
+
+
+    final void setOrigin(VertexPicture originPicture, int originAttachmentIndex) {
         this.originPicture = originPicture;
         this.originAttachmentIndex = originAttachmentIndex;
         Point point = originPoint();
@@ -135,13 +165,8 @@ public class EdgePicture extends AbstractPicture {
         }
     }
 
-    
-    public final void setOrigin(VertexPicture originPicture, Point point) {
-        setOrigin(originPicture, originPicture.nearestAttachmentIndex(point));
-    }
-    
-    
-    protected final void setTerminus(VertexPicture terminusPicture, int terminusAttachmentIndex) {
+
+    final void setTerminus(VertexPicture terminusPicture, int terminusAttachmentIndex) {
         this.terminusPicture = terminusPicture;
         this.terminusAttachmentIndex = terminusAttachmentIndex;
         Point point = terminusPoint();
@@ -152,19 +177,9 @@ public class EdgePicture extends AbstractPicture {
             edge = createEdge();
         }
     }
-    
-    
-    public final void setTerminus(VertexPicture terminusPicture, Point point) {
-        setTerminus(terminusPicture, terminusPicture.nearestAttachmentIndex(point));
-    }
 
 
-    protected String getText() {
-        return null;
-    }
-    
-    
-    protected final void setEndPoint(Point point) {
+    final void setEndPoint(Point point) {
         terminusPicture = null;
         dragPoint = point;
         int last = getPointCount() - 1;
@@ -173,7 +188,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final void setHoverPoint(Point point) {
+    final void setHoverPoint(Point point) {
         hoverIndex = NO_INDEX;
         if (point != null) {
             int index = indexNear(point);
@@ -189,7 +204,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final void selectDragPoint(Point point) {
+    final void selectDragPoint(Point point) {
         int index = indexNear(point);
         if (index != NO_INDEX) {
             if (squareDistance(new Point(xPoints[index], yPoints[index]), point) < NEAR_TOLERANCE) {
@@ -208,32 +223,31 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final boolean hasDragPoint() {
+    final boolean hasDragPoint() {
         return dragIndex != NO_INDEX;
     }
     
     
-    protected final void setDragLocation(Point point) {
-        assert dragIndex != NO_INDEX;
+    final void setDragLocation(Point point) {
         xPoints[dragIndex] = point.x;
         yPoints[dragIndex] = point.y;
     }
     
     
-    protected final void finishDrag() {
+    final void finishDrag() {
         hoverIndex= NO_INDEX;
         dragIndex = NO_INDEX;
         cleanup();
     }
     
     
-    protected final void cleanup() {
+    final void cleanup() {
         removeTwins();
         removeExtremesAngles();
     }
     
     
-    protected final void correctEndPoint(VertexPicture vertexPicture) {
+    final void correctEndPoint(VertexPicture vertexPicture) {
         assert vertexPicture != null;
         if (vertexPicture == originPicture) {
             Point point = originPoint();
@@ -250,12 +264,20 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final boolean hasOrigin(VertexPicture vertexPicture, int index) {
+    final boolean hasOrigin(VertexPicture vertexPicture, int index) {
         return vertexPicture == originPicture && index == originAttachmentIndex;
     }
     
     
-    @Override
+    final void move(int deltaX, int deltaY) {
+        for (int i = 1; i < getPointCount() - 1; ++i) {
+            xPoints[i] += deltaX;
+            yPoints[i] += deltaY;
+        }
+    }
+
+
+   @Override
     protected final int yNorth() {
         int northMost = Integer.MAX_VALUE;
         for (int y : yPoints) {
@@ -295,7 +317,12 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected final Point originPoint() {
+    protected String getText() {
+        return null;
+    }
+
+
+   protected final Point originPoint() {
         if (originPicture != null) {
             return originPicture.getAttachmentPoint(originAttachmentIndex);
         }
@@ -316,7 +343,6 @@ public class EdgePicture extends AbstractPicture {
     
     
     protected final int getPointCount() {
-        assert xPoints.length == yPoints.length;
         return xPoints.length;
     }
     
@@ -346,7 +372,22 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
-    protected void paintText(Graphics2D g2d) {
+    protected int arrowHeadLineIndex() {
+        int n = getPointCount();
+        int index = n / 2;
+        if (n % 2 == 0) {
+            index--;
+        }
+        return index;
+    }
+
+
+    protected Point arrowheadLocation() {
+        return coordinateOnLine(arrowHeadLineIndex(), 0.5);
+    }
+
+
+    private void paintText(Graphics2D g2d) {
         String text = getText();
         if (text != null && ! text.isEmpty()) {
             int left = Math.min(xPoints[0], xPoints[xPoints.length - 1]);
@@ -361,35 +402,12 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    protected int arrowHeadLineIndex() {
-        int n = getPointCount();
-        int index = n / 2;
-        if (n % 2 == 0) {
-            index--;
-        }
-        return index;
-    }
-    
-    
-    protected Point arrowheadLocation() {
-        return coordinateOnLine(arrowHeadLineIndex(), 0.5);
-    }
-    
-    
-    protected void move(int deltaX, int deltaY) {
-        for (int i = 1; i < getPointCount() - 1; ++i) {
-            xPoints[i] += deltaX;
-            yPoints[i] += deltaY;
-        }
-    }
-    
-    
-    protected int deltaX(int index) {
+    private int deltaX(int index) {
         return xPoints[index+1] - xPoints[index];
     }
 
 
-    protected int deltaY(int index) {
+    private int deltaY(int index) {
         return yPoints[index+1] - yPoints[index];
     }
 
@@ -412,7 +430,6 @@ public class EdgePicture extends AbstractPicture {
     
     
     private void insertPoint(Point point, int index) {
-        assert point != null;
         int[] xOld = xPoints;
         int[] yOld = yPoints;
         int count = getPointCount();
@@ -540,7 +557,6 @@ public class EdgePicture extends AbstractPicture {
     
     
     private double vectorCosine(int index) {
-        assert 0 < index && index < getPointCount() - 1;
         Vector v1 = new Vector(xPoints[index] - xPoints[index - 1], yPoints[index] - yPoints[index - 1]);
         Vector v2 = new Vector(xPoints[index + 1] - xPoints[index], yPoints[index + 1] - yPoints[index]);
         return Vector.cosine(v1, v2);
@@ -553,11 +569,11 @@ public class EdgePicture extends AbstractPicture {
    }
     
     
-    protected Edge edge = null;
-    protected VertexPicture originPicture = null;
-    protected VertexPicture terminusPicture = null;
+    protected Edge edge;
+    protected VertexPicture originPicture;
+    protected VertexPicture terminusPicture;
     
-    private Point dragPoint = null;
+    private Point dragPoint;
     private int dragIndex = NO_INDEX;
     
     private int hoverIndex = NO_INDEX;

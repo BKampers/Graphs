@@ -5,14 +5,18 @@
 package bka.graph.swing;
 
 
+import bka.awt.*;
 import java.awt.*;
 
 
 public abstract class AbstractPicture {
 
+    public static final String DRAW = "DRAW";
+    public static final String FILL = "FILL";
 
-    public abstract void paint(Graphics2D g2d);
+    
     public abstract boolean isLocatedAt(Point point);
+    public abstract Shape getShape();
 
     protected abstract int xWest();
     protected abstract int xEast();
@@ -20,33 +24,26 @@ public abstract class AbstractPicture {
     protected abstract int ySouth();
 
    
-    public void setDrawColor(Color color) {
-        if (color != null) {
-            this.drawColor = color;
+    public void paint(Graphics2D g2d) {
+        Shape shape = getShape();
+        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(this);
+        Paint paint = drawStyle.getPaint(FILL);
+        if (paint != null) {
+            g2d.setPaint(paint);
+            g2d.fill(shape);
         }
-        else {
-            this.drawColor = DEFAULT_DRAW_COLOR;
+        paint = drawStyle.getPaint(DRAW);
+        if (paint != null) {
+            g2d.setPaint(paint);
+            Stroke stroke = drawStyle.getStroke(DRAW);
+            g2d.setStroke(stroke);
+            g2d.draw(shape);
         }
-    }
-    
-    
-    public Color getDrawColor() {
-        return drawColor;
-    }
-
-    
-    public Stroke getStroke() {
-        return stroke;
     }
 
-    
-    public void setStroke(Stroke stroke) {
-        if (stroke != null) {
-            this.stroke = stroke;
-        }
-        else {
-            this.stroke = DEFAULT_STROKE;
-        }
+
+    public String[] getConfigurablePaints() {
+        return new String[] { };
     }
 
 
@@ -62,12 +59,6 @@ public abstract class AbstractPicture {
         int δy = p.y - q.y;
         return δx*δx + δy*δy;
     }
-
-
-    protected Color drawColor = DEFAULT_DRAW_COLOR;
-    protected Stroke stroke = DEFAULT_STROKE;
-            
-    private static final Color DEFAULT_DRAW_COLOR = Color.BLACK;
-    private static final Stroke DEFAULT_STROKE = new BasicStroke();
+    
     
 }

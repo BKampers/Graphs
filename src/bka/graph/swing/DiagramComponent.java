@@ -4,6 +4,7 @@
 
 package bka.graph.swing;
 
+import bka.awt.*;
 import bka.graph.document.*;
 import bka.graph.*;
 import java.awt.*;
@@ -35,6 +36,7 @@ public class DiagramComponent extends JComponent {
 
     public final void removeVertexPicture(VertexPicture vertexPicture) {
         pictures.remove(vertexPicture);
+        highlights.remove(vertexPicture);
         page.remove(vertexPicture);
     }
 
@@ -46,6 +48,7 @@ public class DiagramComponent extends JComponent {
 
     public final void removeEdgePicture(EdgePicture edgePicture) {
         pictures.remove(edgePicture);
+        highlights.remove(edgePicture);
         page.remove(edgePicture);
     }
 
@@ -68,29 +71,27 @@ public class DiagramComponent extends JComponent {
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         for (AbstractPicture picture : pictures) {
             try {
-                if (picture == highlightedPicture) {
-                    Color drawColor = picture.getDrawColor();
-                    Stroke normalStroke = g2d.getStroke();
-                    BasicStroke highlightStroke = new BasicStroke(2.0f);
-                    g2d.setStroke(highlightStroke);
-                    picture.setDrawColor(new Color(0, 255, 0, 127));
-                    picture.paint(g2d);
-                    picture.setDrawColor(drawColor);
-                    g2d.setStroke(normalStroke);
-                }
-                else if (picture == selectedPicture) {
-                    Color drawColor = picture.getDrawColor();
-                    picture.setDrawColor(Color.BLUE);
-                    picture.paint(g2d);
-                    picture.setDrawColor(drawColor);
-                }
-                else {
-                    picture.paint(g2d);
-                }
+                picture.paint(g2d);
             }
             catch (RuntimeException ex) {
                 Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Eelement paint", ex);
             }
+        }
+        for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
+            for (DrawStyle style : highlight.getValue()) {
+                Paint paint = style.getPaint("BORDER");
+                Stroke stroke = style.getStroke("BORDER");
+                if (paint != null && stroke != null) {
+                    g2d.setPaint(paint);
+                    g2d.setStroke(stroke);
+                    g2d.draw(highlight.getKey().getShape());
+                }
+            }
+        }
+        if (selectedPicture != null) {
+            g2d.setColor(new Color(0, 0, 128, 64));
+            g2d.setStroke(new BasicStroke(3.0f));
+            g2d.draw(selectedPicture.getShape());
         }
         if (attachmentPoint != null) {
             g2d.setColor(attachmentPointColor);
@@ -138,6 +139,34 @@ public class DiagramComponent extends JComponent {
     }
 
 
+    void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+       Collection<DrawStyle> pictureHighlights = highlights.get(picture);
+       if (pictureHighlights == null) {
+           pictureHighlights = new ArrayList<>();
+           highlights.put(picture, pictureHighlights);
+       }
+       pictureHighlights.add(drawStyle);
+    }
+
+
+    void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+       Collection<DrawStyle> pictureHighlights = highlights.get(picture);
+       if (pictureHighlights != null) {
+           pictureHighlights.remove(drawStyle);
+           if (pictureHighlights.isEmpty()) {
+               highlights.remove(picture);
+           }
+       }
+    }
+
+
+    void resetHighlighted(DrawStyle drawStyle) {
+        for (Map.Entry<AbstractPicture, Collection<DrawStyle>> pictureHighlights : highlights.entrySet()) {
+            pictureHighlights.getValue().remove(drawStyle);
+       }
+    }
+
+
     protected final String getTitle() {
         return page.getTitle();
     }
@@ -179,16 +208,6 @@ public class DiagramComponent extends JComponent {
                 addEdgePicture(picture);
             }
         }
-    }
-    
-    
-    protected void setHighlighted(VertexPicture picture) {
-        highlightedPicture = picture;
-    }
-    
-    
-    protected VertexPicture getHighlighted() {
-        return highlightedPicture;
     }
     
     
@@ -389,25 +408,27 @@ public class DiagramComponent extends JComponent {
         if (dragInfo.edge.hasDragPoint()) {
             dragInfo.edge.finishDrag();
         }
-        else {
-            VertexPicture terminusPicture = getVertexPicture(point);
-            if (terminusPicture != null) {
-                int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
-                if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
-                    dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
-                    page.add(dragInfo.edge);
-                    editor.edgePictureAdded(this, dragInfo.edge);
-                }
-                else {
-                    pictures.remove(dragInfo.edge);
-                }
-            }
-            else {
-                pictures.remove(dragInfo.edge);
-            }
+        else if (! finalizeNewEdge(point)) {
+            pictures.remove(dragInfo.edge);
+            selectedPicture = null;
         }
     }
-    
+
+
+    private boolean finalizeNewEdge(Point point) {
+        VertexPicture terminusPicture = getVertexPicture(point);
+        if (terminusPicture != null) {
+            int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
+            if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
+                dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
+                page.add(dragInfo.edge);
+                editor.edgePictureAdded(this, dragInfo.edge);
+                return true;
+            }
+        }
+        return false;
+    }
+
     
     private void initializeVertexDragging() {
         assert hoverInfo != null;
@@ -857,12 +878,12 @@ public class DiagramComponent extends JComponent {
     private final DiagramPage page;
     private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
 
-    private AbstractPicture selectedPicture = null;
+    private AbstractPicture selectedPicture;
 
     private DragInfo dragInfo;     
     private HoverInfo hoverInfo;
     
-    private VertexPicture highlightedPicture;
+    private final Map<AbstractPicture, Collection<DrawStyle>> highlights = new HashMap<>();
 
     private Point attachmentPoint;
     

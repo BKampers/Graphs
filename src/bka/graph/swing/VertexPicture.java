@@ -27,16 +27,14 @@ public class VertexPicture extends AbstractPicture {
     public VertexPicture() {
         size = new Dimension(10, 10);
     }
-    
-    
+
+
     @Override
-    public void paint(Graphics2D g2d) {
-        g2d.setStroke(stroke);
-        g2d.setColor(drawColor);
-        g2d.fillOval(xWest(), yNorth(), size.width, size.height);
+    public Shape getShape() {
+        return new java.awt.geom.Ellipse2D.Float(xWest(), yNorth(), size.width, size.height);
     }
-    
-    
+
+
     public Vertex getVertex() {
         return vertex;
     }

@@ -4,11 +4,13 @@
 
 package bka.graph.document;
 
+import bka.awt.*;
 import bka.graph.*;
 import bka.graph.swing.*;
 import java.beans.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 
 public class Book {
@@ -23,6 +25,7 @@ public class Book {
         try (XMLEncoder xmlEncoder = createEncoder(file)) {
             xmlEncoder.writeObject(pages);
             xmlEncoder.writeObject(pageIndex);
+            xmlEncoder.writeObject(DrawStyleManager.getInstance().getCustomizedDrawStyles());
         }
     }
 
@@ -30,8 +33,29 @@ public class Book {
    public void load(File file) throws FileNotFoundException {
         try (XMLDecoder xmlDecoder = createDecoder(file)) {
             pages.clear();
-            pages.addAll((ArrayList<DiagramPage>) xmlDecoder.readObject());
-            pageIndex = (Integer) xmlDecoder.readObject();
+            Object read = readObject(xmlDecoder);
+            if (read != null) {
+                pages.addAll((ArrayList<DiagramPage>) read);
+            }
+            read = readObject(xmlDecoder);
+            if (read != null) {
+                pageIndex = (Integer) read;
+            }
+            read = readObject(xmlDecoder);
+            if (read != null) {
+                DrawStyleManager.getInstance().setDrawStyles((Map<Object, DrawStyle>) read);
+            }
+        }
+    }
+
+
+    private static Object readObject(XMLDecoder xmlDecoder) {
+        try {
+            return xmlDecoder.readObject();
+        }
+        catch (RuntimeException ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.WARNING, "read object", ex);
+            return null;
         }
     }
 
