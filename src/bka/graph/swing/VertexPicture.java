@@ -4,6 +4,7 @@
 
 package bka.graph.swing;
 
+import bka.awt.*;
 import bka.graph.Vertex;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,12 +30,6 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
-    @Override
-    public Shape getShape() {
-        return new java.awt.geom.Ellipse2D.Float(xWest(), yNorth(), size.width, size.height);
-    }
-
-
     public Vertex getVertex() {
         return vertex;
     }
@@ -53,6 +48,7 @@ public class VertexPicture extends AbstractPicture {
     public void setLocation(Point location) {
         this.location = location;
         initAttachmentPoints();
+        clearShape();
     }
     
     
@@ -64,6 +60,7 @@ public class VertexPicture extends AbstractPicture {
     public void setSize(Dimension size) {
         this.size = size;
         initAttachmentPoints();
+        clearShape();
     }
     
     
@@ -136,27 +133,50 @@ public class VertexPicture extends AbstractPicture {
     
     @Override
     protected final int yNorth() {
-        return location.y - size.height/2;
+        return location.y - size.height / 2;
     }
     
 
     @Override
     protected final int ySouth() {
-        return location.y + size.height/2;
+        return location.y + size.height / 2;
     }
     
 
     @Override
     protected final int xWest() {
-        return location.x - size.width/2;
+        return location.x - size.width / 2;
     }
     
 
     @Override
     protected final int xEast() {
-        return location.x + size.width/2;
+        return location.x + size.width / 2;
     }
     
+
+    @Override
+    protected void paintShape(Graphics2D g2d, DrawStyle drawStyle) {
+        Paint fillPaint = drawStyle.getPaint(FILL);
+        if (fillPaint != null) {
+            g2d.setPaint(fillPaint);
+            g2d.fill(getShape());
+        }
+        Paint drawPaint = drawStyle.getPaint(DRAW);
+        if (drawPaint != null) {
+            g2d.setPaint(drawPaint);
+            Stroke stroke = drawStyle.getStroke(DRAW);
+            g2d.setStroke((stroke != null) ? stroke : DEFAULT_STROKE);
+            g2d.draw(getShape());
+        }
+    }
+
+
+    @Override
+    protected Shape buildShape() {
+        return new java.awt.geom.Ellipse2D.Float(xWest(), yNorth(), size.width, size.height);
+    }
+
 
     protected final javax.swing.Icon createIcon(int width, int height) {
         return new javax.swing.ImageIcon(createImage(width, height));

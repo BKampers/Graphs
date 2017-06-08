@@ -14,35 +14,34 @@ public abstract class AbstractPicture {
     public static final String DRAW = "DRAW";
     public static final String FILL = "FILL";
 
-    
+
+
     public abstract boolean isLocatedAt(Point point);
-    public abstract Shape getShape();
+    
+    protected abstract void paintShape(Graphics2D g2d, DrawStyle drawStyle);
+    protected abstract Shape buildShape();
 
     protected abstract int xWest();
     protected abstract int xEast();
     protected abstract int yNorth();
     protected abstract int ySouth();
 
-   
-    public void paint(Graphics2D g2d) {
-        Shape shape = getShape();
-        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(this);
-        Paint paint = drawStyle.getPaint(FILL);
-        if (paint != null) {
-            g2d.setPaint(paint);
-            g2d.fill(shape);
+
+    public final Shape getShape() {
+        if (shape == null) {
+            shape = buildShape();
         }
-        paint = drawStyle.getPaint(DRAW);
-        if (paint != null) {
-            g2d.setPaint(paint);
-            Stroke stroke = drawStyle.getStroke(DRAW);
-            g2d.setStroke(stroke);
-            g2d.draw(shape);
-        }
+        return shape;
     }
 
 
-    public String[] getConfigurablePaints() {
+    public final void paint(Graphics2D g2d) {
+        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(this);
+        paintShape(g2d, drawStyle);
+    }
+
+
+    public String[] getCustomizablePaints() {
         return new String[] { };
     }
 
@@ -53,12 +52,22 @@ public abstract class AbstractPicture {
         return new Rectangle(x, y, xEast() - x, ySouth() - y);
     }
 
+
+    protected void clearShape() {
+        shape = null;
+    }
+
+
     
     protected static int squareDistance(Point p, Point q) {
         int δx = p.x - q.x;
         int δy = p.y - q.y;
         return δx*δx + δy*δy;
     }
+
+
+    protected static final Stroke DEFAULT_STROKE = new BasicStroke();
     
-    
+    private  Shape shape;
+
 }

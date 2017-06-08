@@ -202,7 +202,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     protected JPopupMenu getEdgeMenu(final EdgePicture picture) {
         JPopupMenu menu = new JPopupMenu();
-        for (String paintKey : picture.getConfigurablePaints()) {
+        for (String paintKey : picture.getCustomizablePaints()) {
             JMenuItem colorItem = new JMenuItem("Color: " + paintKey);
             colorItem.addActionListener((ActionEvent evt) -> {
                 modifyColor(picture, paintKey);

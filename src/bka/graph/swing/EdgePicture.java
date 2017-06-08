@@ -92,43 +92,7 @@ public class EdgePicture extends AbstractPicture {
    
     
     @Override
-    public void paint(Graphics2D g2d) {
-        super.paint(g2d);
-        if (edge == null || edge.isDirected()) {
-            int index = arrowHeadLineIndex();
-            double angle = angle(index);
-            Point location = arrowheadLocation();
-            if (location != null) {
-                DrawStyle style = DrawStyleManager.getInstance().getDrawStyle(this);
-                g2d.setStroke(style.getStroke(ARROW_HEAD));
-                g2d.translate(location.x, location.y);
-                g2d.rotate(angle);
-                paintArrowhead(g2d);
-                g2d.rotate(- angle);
-                g2d.translate(- location.x, - location.y);
-            }
-        }
-        if (hoverIndex != NO_INDEX) {
-            g2d.setColor(Color.BLACK);
-            g2d.drawOval(xPoints[hoverIndex] - 2, yPoints[hoverIndex] - 2, 5, 5);
-        }
-        paintText(g2d);
-    }
-
-
-    @Override
-    public Shape getShape() {
-        Path2D.Float path = new Path2D.Float();
-        path.moveTo(xPoints[0], yPoints[0]);
-        for (int i = 1; i < xPoints.length; ++i) {
-            path.lineTo(xPoints[i], yPoints[i]);
-        }
-        return path;
-    }
-
-
-    @Override
-    public String[] getConfigurablePaints() {
+    public String[] getCustomizablePaints() {
         return new String[] { AbstractPicture.DRAW };
     }
         
@@ -173,6 +137,7 @@ public class EdgePicture extends AbstractPicture {
         int last = getPointCount() - 1;
         xPoints[last] = point.x;
         yPoints[last] = point.y;
+        clearShape();
         if (originPicture != null && terminusPicture != null) {
             edge = createEdge();
         }
@@ -185,6 +150,7 @@ public class EdgePicture extends AbstractPicture {
         int last = getPointCount() - 1;
         xPoints[last] = point.x;
         yPoints[last] = point.y;
+        clearShape();
     }
     
     
@@ -231,6 +197,7 @@ public class EdgePicture extends AbstractPicture {
     final void setDragLocation(Point point) {
         xPoints[dragIndex] = point.x;
         yPoints[dragIndex] = point.y;
+        clearShape();
     }
     
     
@@ -243,7 +210,8 @@ public class EdgePicture extends AbstractPicture {
     
     final void cleanup() {
         removeTwins();
-        removeExtremesAngles();
+        removeExtremeAngles();
+        clearShape();
     }
     
     
@@ -253,12 +221,14 @@ public class EdgePicture extends AbstractPicture {
             Point point = originPoint();
             xPoints[0] = point.x;
             yPoints[0] = point.y;
+            clearShape();
         }
         if (vertexPicture == terminusPicture) {
             Point point = terminusPoint();
             int last = getPointCount() - 1;
             xPoints[last] = point.x;
             yPoints[last] = point.y;
+            clearShape();
         }
         
     }
@@ -362,6 +332,48 @@ public class EdgePicture extends AbstractPicture {
     
     protected AbstractEditPanel getEditPanel() {
         return null;
+    }
+
+
+    @Override
+    protected void paintShape(Graphics2D g2d, DrawStyle drawStyle) {
+        Paint drawPaint = drawStyle.getPaint(DRAW);
+        if (drawPaint != null) {
+            g2d.setPaint(drawPaint);
+            Stroke stroke = drawStyle.getStroke(DRAW);
+            g2d.setStroke((stroke != null) ? stroke : DEFAULT_STROKE);
+            g2d.draw(getShape());
+        }
+        if (edge == null || edge.isDirected()) {
+            int index = arrowHeadLineIndex();
+            double angle = angle(index);
+            Point location = arrowheadLocation();
+            if (location != null) {
+                DrawStyle style = DrawStyleManager.getInstance().getDrawStyle(this);
+                g2d.setStroke(style.getStroke(ARROW_HEAD));
+                g2d.translate(location.x, location.y);
+                g2d.rotate(angle);
+                paintArrowhead(g2d);
+                g2d.rotate(- angle);
+                g2d.translate(- location.x, - location.y);
+            }
+        }
+        if (hoverIndex != NO_INDEX) {
+            g2d.setColor(Color.BLACK);
+            g2d.drawOval(xPoints[hoverIndex] - 2, yPoints[hoverIndex] - 2, 5, 5);
+        }
+        paintText(g2d);
+    }
+
+
+    @Override
+    protected Shape buildShape() {
+        Path2D.Float path = new Path2D.Float();
+        path.moveTo(xPoints[0], yPoints[0]);
+        for (int i = 1; i < xPoints.length; ++i) {
+            path.lineTo(xPoints[i], yPoints[i]);
+        }
+        return path;
     }
 
 
@@ -484,7 +496,7 @@ public class EdgePicture extends AbstractPicture {
     }
     
     
-    private void removeExtremesAngles() {
+    private void removeExtremeAngles() {
         int i = 1;
         while (i < getPointCount() - 1) {
             double cosine = vectorCosine(i);
@@ -587,5 +599,5 @@ public class EdgePicture extends AbstractPicture {
     private static final int NEAR_TOLERANCE = 7;
     
     private static final int NO_INDEX = -1;
-    
+
 }
