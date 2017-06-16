@@ -6,11 +6,11 @@
 package bka.graph;
 
 
-public class ContainerEdge extends Edge {
+public class ContainerEdge extends DirectedEdge {
     
     
     public ContainerEdge(Vertex container, Vertex contained) {
-        super(container, contained, true);
+        super(container, contained);
     }
     
 

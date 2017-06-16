@@ -10,12 +10,11 @@ public class Edge {
     
     public Edge() {
     }
-    
-    
-    public Edge(Vertex origin, Vertex terminus, boolean directed) {
+
+
+    public Edge(Vertex origin, Vertex terminus) {
         this.origin = origin;
         this.terminus = terminus;
-        this.directed = directed;
     }
     
     
@@ -45,18 +44,12 @@ public class Edge {
     }
     
     
-    public final boolean isDirected() {
-        return directed;
-    }
-    
-    
-    public final void setDirected(boolean directed) {
-        this.directed = directed;
+    public boolean isDirected() {
+        return false;
     }
     
     
     private Vertex origin;
     private Vertex terminus;
-    private boolean directed;
     
 }
