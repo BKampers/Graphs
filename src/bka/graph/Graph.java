@@ -9,18 +9,19 @@ package bka.graph;
 import java.util.*;
 
 
-public class Graph {
-    
+public class Graph<V extends Vertex, E extends Edge<V>> {
+
+
     public Graph() {
     }
 
     
-    public Graph(Collection<Edge> edges) {
+    public Graph(Collection<E> edges) {
         addEdges(edges);
     }
     
     
-    public Graph(Collection<Vertex> vertices, Collection<Edge> edges) {
+    public Graph(Collection<V> vertices, Collection<E> edges) {
         addEdges(edges);
         addVertices(vertices);
     }
@@ -32,29 +33,28 @@ public class Graph {
     }
     
     
-    public final void addVertices(Collection<Vertex> vertices) {
-        for (Vertex vertex : vertices) {
+    public final void addVertices(Collection<V> vertices) {
+        for (V vertex : vertices) {
             add(vertex);
         }
     }
     
     
-    public final void addEdges(Collection<Edge> edges) {
-        Iterator<Edge> ie = edges.iterator();
-        while (ie.hasNext()) {
-            add(ie.next());
+    public final void addEdges(Collection<E> edges) {
+        for (E edge : edges) {
+            add(edge);
         }
     }
     
     
-    public void add(Vertex vertex) {
+    public void add(V vertex) {
         if (! vertices.contains(vertex)) {
             vertices.add(vertex);
         }
     }
     
     
-    public void add(Edge edge) {
+    public void add(E edge) {
         if (! edges.contains(edge)) {
             edges.add(edge);
             add(edge.getOrigin());
@@ -63,43 +63,43 @@ public class Graph {
     }
     
     
-    public Collection<Vertex> getVertices() {
+    public Collection<V> getVertices() {
         return vertices;
     }
     
     
-    public Collection<Edge> getEdges() {
+    public Collection<E> getEdges() {
         return edges;
     }
     
     
-    public boolean contains(Vertex vertex) {
+    public boolean contains(V vertex) {
         return vertices.contains(vertex);
     }
     
     
-    public boolean contains(Edge edge) {
+    public boolean contains(E edge) {
         return edges.contains(edge);
     }
     
     
     public boolean isDirected() {
-        boolean directed = true;
-        Iterator<Edge> ie = edges.iterator();
-        while (directed && ie.hasNext()) {
-            directed = ie.next().isDirected();
+        for (E edge : edges) {
+            if (! edge.isDirected()) {
+                return false;
+            }
         }
-        return directed;
+        return true;
     }
     
     
     public boolean isUndirected() {
-        boolean undirected = true;
-        Iterator<Edge> ie = edges.iterator();
-        while (undirected && ie.hasNext()) {
-            undirected = ! ie.next().isDirected();
+        for (E edge : edges) {
+            if (edge.isDirected()) {
+                return false;
+            }
         }
-        return undirected;
+        return true;
     }
     
     
@@ -108,11 +108,9 @@ public class Graph {
     }
     
     
-    public Collection<Edge> allDirectedEdgesFrom(Vertex vertex) {
-        Collection<Edge> collection = new ArrayList<>();
-        Iterator<Edge> ie = edges.iterator();
-        while (ie.hasNext()) {
-            Edge edge = ie.next();
+    public Collection<E> allDirectedEdgesFrom(V vertex) {
+        Collection<E> collection = new ArrayList<>();
+        for (E edge : edges) {
             if (edge.isDirected() && edge.getOrigin() == vertex) {
                 collection.add(edge);
             }
@@ -121,11 +119,9 @@ public class Graph {
     }
     
     
-    public Collection<Edge> allDirectedEdgesTo(Vertex vertex) {
-        Collection<Edge> collection = new ArrayList<>();
-        Iterator<Edge> ie = edges.iterator();
-        while (ie.hasNext()) {
-            Edge edge = ie.next();
+    public Collection<E> allDirectedEdgesTo(V vertex) {
+        Collection<E> collection = new ArrayList<>();
+        for (E edge : edges) {
             if (edge.isDirected() && edge.getTerminus() == vertex) {
                 collection.add(edge);
             }
@@ -134,14 +130,10 @@ public class Graph {
     }
     
     
-    public Collection<Edge> allUndirectedEdgesFrom(Vertex vertex) {
-        Collection<Edge> collection = new ArrayList<>();
-        Iterator<Edge> ie = edges.iterator();
-        while (ie.hasNext()) {
-            Edge edge = ie.next();
-            if (! edge.isDirected() && 
-                (edge.getOrigin() == vertex || edge.getTerminus() == vertex)) 
-            {
+    public Collection<E> allUndirectedEdgesFrom(V vertex) {
+        Collection<E> collection = new ArrayList<>();
+        for (E edge : edges) {
+            if (! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex)) {
                 collection.add(edge);
             }
         }
@@ -149,14 +141,12 @@ public class Graph {
     }
     
     
-    public Graph directedGraphFrom(Vertex seed) {
-        Graph graph = new Graph();
-        Collection<Edge> leavingEdges = allDirectedEdgesFrom(seed);
-        Iterator<Edge> ie = leavingEdges.iterator();
-        while (ie.hasNext()) {
-            Edge edge = ie.next();
+    public Graph<V, E> directedGraphFrom(V seed) {
+        Graph<V, E> graph = new Graph<>();
+        Collection<E> leavingEdges = allDirectedEdgesFrom(seed);
+        for (E edge : leavingEdges) {
             graph.add(edge.getOrigin());
-            Vertex terminus = edge.getTerminus();
+            V terminus = edge.getTerminus();
             if (! graph.contains(terminus)) {
                 graph.add(directedGraphFrom(terminus));
             }
@@ -166,21 +156,21 @@ public class Graph {
     }
     
     
-    public List<Vertex> directedWalk(Vertex start, Vertex end) {
-        List<Vertex> walk = new ArrayList<>();
+    public List<V> directedWalk(V start, V end) {
+        List<V> walk = new ArrayList<>();
         findDirectedWalk(walk, start, end);
         return walk;
     }
     
     
-    private void findDirectedWalk(List<Vertex> walk, Vertex start, Vertex end) {
+    private void findDirectedWalk(List<V> walk, V start, V end) {
         if (! walk.contains(start)) {
             walk.add(start);
             boolean found = start == end;
             if (! found) {
-                Iterator<Edge> leavingEdges = allDirectedEdgesFrom(start).iterator();
+                Iterator<E> leavingEdges = allDirectedEdgesFrom(start).iterator();
                 while (! found && leavingEdges.hasNext()) {
-                    Edge nextEdge = leavingEdges.next();
+                    E nextEdge = leavingEdges.next();
                     if (nextEdge.isDirected()) {
                         findDirectedWalk(walk, nextEdge.getTerminus(), end);
                         found = walk.contains(end);
@@ -194,18 +184,18 @@ public class Graph {
     }
     
     
-    public Vertex findContainer(Vertex vertex) {
-        for (Edge edge : allDirectedEdgesTo(vertex)) {
+    public V findContainer(V vertex) {
+        for (E edge : allDirectedEdgesTo(vertex)) {
             if (edge instanceof ContainerEdge) {
-                return edge.getOrigin();
+                return (V) edge.getOrigin();
             }
         }
         return null;
     }
     
     
-    public Vertex findContainer(Vertex vertex, Class<? extends Vertex> vertexClass) {
-        Vertex container = findContainer(vertex);
+    public Vertex findContainer(V vertex, Class<? extends Vertex> vertexClass) {
+        V container = findContainer(vertex);
         if (container != null) {
             if (container.getClass() == vertexClass) {
                 return container;
@@ -220,7 +210,7 @@ public class Graph {
     }
 
 
-    private final Collection<Vertex> vertices = new ArrayList<>();
-    private final Collection<Edge> edges = new ArrayList<>();
+    private final Collection<V> vertices = new ArrayList<>();
+    private final Collection<E> edges = new ArrayList<>();
     
 }

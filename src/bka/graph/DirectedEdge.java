@@ -5,14 +5,14 @@
 package bka.graph;
 
 
-public class DirectedEdge extends Edge {
+public class DirectedEdge<V extends Vertex> extends Edge<V> {
 
 
     public DirectedEdge() {
     }
 
 
-    public DirectedEdge(Vertex origin, Vertex terminus) {
+    public DirectedEdge(V origin, V terminus) {
         super(origin, terminus);
     }
 

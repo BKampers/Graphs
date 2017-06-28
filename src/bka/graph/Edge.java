@@ -5,41 +5,46 @@
 package bka.graph;
 
 
-public class Edge {
+public class Edge<V extends Vertex> {
 
     
     public Edge() {
     }
 
 
-    public Edge(Vertex origin, Vertex terminus) {
+    public Edge(V origin, V terminus) {
         this.origin = origin;
         this.terminus = terminus;
     }
     
     
-    public final void init(Vertex origin, Vertex terminus) {
+    public final void init(V origin, V terminus) {
         this.origin = origin;
         this.terminus = terminus;
     }
+
+
+    public <U extends Vertex> U getVertex() {
+        return (U) origin;
+    }
     
     
-    public final Vertex getOrigin() {
+    public final V getOrigin() {
         return origin;
     }
     
     
-    public final void setOrigin(Vertex vertex) {
+    public final void setOrigin(V vertex) {
         origin = vertex;
     }
     
     
-    public final Vertex getTerminus() {
+    public final V getTerminus() {
         return terminus;
     }
     
     
-    public final void setTerminus(Vertex vertex) {
+    public final void setTerminus(V vertex) {
         terminus = vertex;
     }
     
@@ -49,7 +54,7 @@ public class Edge {
     }
     
     
-    private Vertex origin;
-    private Vertex terminus;
+    private V origin;
+    private V terminus;
     
 }
