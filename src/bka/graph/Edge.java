@@ -22,11 +22,6 @@ public class Edge<V extends Vertex> {
         this.origin = origin;
         this.terminus = terminus;
     }
-
-
-    public <U extends Vertex> U getVertex() {
-        return (U) origin;
-    }
     
     
     public final V getOrigin() {

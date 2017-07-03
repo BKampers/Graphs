@@ -29,25 +29,25 @@ public class GraphsTest {
 
     @Test
     public void testIsDirected() {
-        assertTrue(new Graph(Arrays.asList(D01)).isDirected());
-        assertFalse(new Graph(Arrays.asList(U01)).isDirected());
-        assertFalse(new Graph(Arrays.asList(D01, U01)).isDirected());
+        assertTrue(new Graph(Arrays.asList(D01, D02)).isDirected());
+        assertFalse(new Graph(Arrays.asList(U01, U02)).isDirected());
+        assertFalse(new Graph(Arrays.asList(D01, U02)).isDirected());
     }
 
 
     @Test
     public void testIsUndirected() {
-        assertFalse(new Graph(Arrays.asList(D01)).isUndirected());
-        assertTrue(new Graph(Arrays.asList(U01)).isUndirected());
-        assertFalse(new Graph(Arrays.asList(D01, U01)).isUndirected());
+        assertFalse(new Graph(Arrays.asList(D01, D02)).isUndirected());
+        assertTrue(new Graph(Arrays.asList(U01, U02)).isUndirected());
+        assertFalse(new Graph(Arrays.asList(D01, U02)).isUndirected());
     }
 
 
     @Test
     public void testIsMixed() {
-        assertFalse(new Graph(Arrays.asList(D01)).isMixed());
-        assertFalse(new Graph(Arrays.asList(U01)).isMixed());
-        assertTrue(new Graph(Arrays.asList(D01, U01)).isMixed());
+        assertFalse(new Graph(Arrays.asList(D01, D02)).isMixed());
+        assertFalse(new Graph(Arrays.asList(U01, U02)).isMixed());
+        assertTrue(new Graph(Arrays.asList(D01, U02)).isMixed());
     }
 
 

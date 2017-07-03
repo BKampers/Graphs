@@ -9,13 +9,20 @@ package bka.graph;
 import java.util.*;
 
 
+/**
+ * A set V of vertices together with a set E of edges, which are 2-element subsets of V.
+ * This means  an edge is associated with two vertices.
+ * Edges can eiher be oredered (directed) or unordered (undirected.
+ * @param <V> vertices
+ * @param <E> edges
+ */
 public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public Graph() {
     }
 
-    
+
     public Graph(Collection<E> edges) {
         addEdges(edges);
     }
@@ -26,7 +33,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         addVertices(vertices);
     }
     
-    
+
     public void add(Graph graph) {
         addEdges(graph.edges);
         addVertices(graph.vertices);
@@ -64,12 +71,12 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public Collection<V> getVertices() {
-        return vertices;
+        return new ArrayList<>(vertices);
     }
     
     
     public Collection<E> getEdges() {
-        return edges;
+        return new ArrayList<>(edges);
     }
     
     
