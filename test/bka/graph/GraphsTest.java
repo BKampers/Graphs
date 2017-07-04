@@ -109,21 +109,11 @@ public class GraphsTest {
 
 
     @Test
-    public void testFindContainer() {
-        Graph graph = new Graph(Arrays.asList(V0), Arrays.asList(U12));
-        graph.add(new ContainerEdge(V0, V1));
-        assertEquals(V0, graph.findContainer(V1));
-    }
-
-
-    @Test
-    public void testFindTypedContainer() {
+    public void testFindOrigin() {
         Vertex typed = new TypedVertex();
-        Graph graph = new Graph(Arrays.asList(V0), Arrays.asList(U12));
-        graph.add(typed);
-        graph.add(new ContainerEdge(typed, V0));
-        graph.add(new ContainerEdge(V0, V1));
-        assertEquals(typed, graph.findContainer(V1, TypedVertex.class));
+        Graph graph = new Graph(Arrays.asList(typed), Arrays.asList(D12));
+        graph.add(new DirectedEdge(typed, V2));
+        assertEquals(typed, graph.findOrigin(V2, TypedVertex.class));
     }
 
 

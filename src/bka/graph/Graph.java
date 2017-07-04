@@ -68,6 +68,16 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
             add(edge.getTerminus());
         }
     }
+
+
+    public V findOrigin(V vertex, Class<? extends Vertex> originClass) {
+        for (E edge : allDirectedEdgesTo(vertex)) {
+            if (edge.getOrigin().getClass() == originClass) {
+                return edge.getOrigin();
+            }
+        }
+        return null;
+    }
     
     
     public Collection<V> getVertices() {
@@ -135,8 +145,19 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         }
         return collection;
     }
-    
-    
+
+
+    public Collection<E> allDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
+        Collection<E> collection = new ArrayList<>();
+        for (E edge : allDirectedEdgesTo(vertex)) {
+            if (edge.getClass() == edgeClass) {
+                collection.add(edge);
+            }
+        }
+        return collection;
+    }
+
+
     public Collection<E> allUndirectedEdgesFrom(V vertex) {
         Collection<E> collection = new ArrayList<>();
         for (E edge : edges) {
@@ -162,33 +183,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public V findContainer(V vertex) {
-        for (E edge : allDirectedEdgesTo(vertex)) {
-            if (edge instanceof ContainerEdge) {
-                return edge.getOrigin();
-            }
-        }
-        return null;
-    }
-    
-    
-    public Vertex findContainer(V vertex, Class<? extends Vertex> vertexClass) {
-        V container = findContainer(vertex);
-        if (container != null) {
-            if (container.getClass() == vertexClass) {
-                return container;
-            }
-            else {
-                return findContainer(container, vertexClass);
-            }
-        }
-        else {
-            return null;
-        }
-    }
-
-
-    private void findDirectedWalk(List<V> walk, V start, V end) {
+     private void findDirectedWalk(List<V> walk, V start, V end) {
         if (! walk.contains(start)) {
             walk.add(start);
             boolean found = start == end;
