@@ -7,6 +7,7 @@ package bka.graph;
 
 
 import java.util.*;
+import java.util.function.*;
 
 
 /**
@@ -126,46 +127,22 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public Collection<E> allDirectedEdgesFrom(V vertex) {
-        Collection<E> collection = new ArrayList<>();
-        for (E edge : edges) {
-            if (edge.isDirected() && edge.getOrigin() == vertex) {
-                collection.add(edge);
-            }
-        }
-        return collection;
+        return allEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
     }
     
     
     public Collection<E> allDirectedEdgesTo(V vertex) {
-        Collection<E> collection = new ArrayList<>();
-        for (E edge : edges) {
-            if (edge.isDirected() && edge.getTerminus() == vertex) {
-                collection.add(edge);
-            }
-        }
-        return collection;
+        return allEdges((E edge) -> edge.isDirected() && edge.getTerminus() == vertex);
     }
 
 
     public Collection<E> allDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
-        Collection<E> collection = new ArrayList<>();
-        for (E edge : allDirectedEdgesTo(vertex)) {
-            if (edge.getClass() == edgeClass) {
-                collection.add(edge);
-            }
-        }
-        return collection;
+        return allEdges((E edge) -> edge.getClass() == edgeClass);
     }
 
 
     public Collection<E> allUndirectedEdgesFrom(V vertex) {
-        Collection<E> collection = new ArrayList<>();
-        for (E edge : edges) {
-            if (! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex)) {
-                collection.add(edge);
-            }
-        }
-        return collection;
+        return allEdges((E edge) -> ! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex));
     }
     
     
@@ -213,6 +190,28 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
                 findDirectedGraphFrom(terminus, graph);
             }
         }
+    }
+
+
+    public Collection<V> allVertices(Predicate<V> predicate) {
+        Collection<V> all = new ArrayList<>();
+        for (V vertex : vertices) {
+            if (predicate.test(vertex)) {
+                all.add(vertex);
+            }
+        }
+        return all;
+    }
+
+
+    public Collection<E> allEdges(Predicate<E> predicate) {
+        Collection<E> all = new ArrayList<>();
+        for (E edge : edges) {
+            if (predicate.test(edge)) {
+                all.add(edge);
+            }
+        }
+        return all;
     }
 
 
