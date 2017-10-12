@@ -2,36 +2,10 @@ package bka.graph;
 
 public class Vertex {
     
-    public Vertex() {
-    }
-    
-    
-    public Vertex(String name) {
-        this.name = name;
-    }
-    
     
     public String getName() {
-        return name;
+        return null;
     }
-    
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
 
-    @Override
-    public String toString() {
-        if (name != null) {
-            return name;
-        }
-        else {
-            return super.toString();
-        }
-    }
-    
-
-    protected String name = null;
     
 }

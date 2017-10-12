@@ -13,9 +13,6 @@ import org.junit.Test;
 
 public class GraphsTest {
 
-    public GraphsTest() {
-    }
-
     
     @Test
     public void testContains() {
