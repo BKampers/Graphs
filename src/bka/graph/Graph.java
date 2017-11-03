@@ -56,6 +56,9 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public void add(V vertex) {
+        if (vertex == null) {
+            throw new IllegalArgumentException();
+        }
         if (! vertices.contains(vertex)) {
             vertices.add(vertex);
         }
@@ -63,6 +66,9 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public void add(E edge) {
+        if (edge == null) {
+            throw new IllegalArgumentException();
+        }
         if (! edges.contains(edge)) {
             edges.add(edge);
             add(edge.getOrigin());
