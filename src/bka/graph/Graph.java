@@ -33,7 +33,45 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         addEdges(edges);
         addVertices(vertices);
     }
-    
+
+
+    public final void addVertices(Collection<V> vertices) {
+        for (V vertex : vertices) {
+            add(vertex);
+        }
+    }
+
+
+    public final void addEdges(Collection<E> edges) {
+        for (E edge : edges) {
+            add(edge);
+        }
+    }
+
+
+    public final boolean add(V vertex) {
+        if (vertex == null) {
+            throw new IllegalArgumentException();
+        }
+        if (vertices.contains(vertex)) {
+            return false;
+        }
+        return vertices.add(vertex);
+    }
+
+
+    public final boolean add(E edge) {
+        if (edge == null) {
+            throw new IllegalArgumentException();
+        }
+        if (edges.contains(edge)) {
+            return false;
+        }
+        add(edge.getOrigin());
+        add(edge.getTerminus());
+        return edges.add(edge);
+    }
+
 
     public void add(Graph graph) {
         addEdges(graph.edges);
@@ -41,39 +79,28 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
     
     
-    public final void addVertices(Collection<V> vertices) {
-        for (V vertex : vertices) {
-            add(vertex);
+    public boolean remove(V vertex) {
+        boolean removed = vertices.remove(vertex);
+        if (removed) {
+            Iterator<E> it = edges.iterator();
+            while (it.hasNext()) {
+                E edge = it.next();
+                if (vertex.equals(edge.getOrigin()) || vertex.equals(edge.getTerminus())) {
+                    it.remove();
+                }
+            }
         }
+        return removed;
     }
-    
-    
-    public final void addEdges(Collection<E> edges) {
-        for (E edge : edges) {
-            add(edge);
-        }
+
+
+    public boolean remove(E edge) {
+        return edges.remove(edge);
     }
-    
-    
-    public void add(V vertex) {
-        if (vertex == null) {
-            throw new IllegalArgumentException();
-        }
-        if (! vertices.contains(vertex)) {
-            vertices.add(vertex);
-        }
-    }
-    
-    
-    public void add(E edge) {
-        if (edge == null) {
-            throw new IllegalArgumentException();
-        }
-        if (! edges.contains(edge)) {
-            edges.add(edge);
-            add(edge.getOrigin());
-            add(edge.getTerminus());
-        }
+
+
+    public boolean isEmpty() {
+        return vertices.isEmpty();
     }
 
 
@@ -88,12 +115,12 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public Collection<V> getVertices() {
-        return new ArrayList<>(vertices);
+        return Collections.unmodifiableCollection(vertices);
     }
     
     
     public Collection<E> getEdges() {
-        return new ArrayList<>(edges);
+        return Collections.unmodifiableCollection(edges);
     }
     
     
@@ -130,8 +157,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public boolean isMixed() {
         return ! (isDirected() || isUndirected());
     }
-    
-    
+
+
+    public boolean isLeaf(V vertex) {
+        return allDirectedEdgesFrom(vertex).isEmpty();
+    }
+
+
     public Collection<E> allDirectedEdgesFrom(V vertex) {
         return allEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
     }
@@ -174,10 +206,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
                 Iterator<E> leavingEdges = allDirectedEdgesFrom(start).iterator();
                 while (! found && leavingEdges.hasNext()) {
                     E nextEdge = leavingEdges.next();
-                    if (nextEdge.isDirected()) {
-                        findDirectedWalk(walk, nextEdge.getTerminus(), end);
-                        found = walk.contains(end);
-                    }
+                    findDirectedWalk(walk, nextEdge.getTerminus(), end);
+                    found = walk.contains(end);
                 }
             }
             if (! found) {
@@ -223,5 +253,5 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
     private final Collection<V> vertices = new ArrayList<>();
     private final Collection<E> edges = new ArrayList<>();
-    
+
 }
