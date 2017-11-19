@@ -47,6 +47,16 @@ public class Edge<V extends Vertex> {
     public boolean isDirected() {
         return false;
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(origin.toString());
+        builder.append(isDirected() ? " -> " : " -- ");
+        builder.append(terminus.toString());
+        return builder.toString();
+    }
     
     
     private V origin;
