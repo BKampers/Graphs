@@ -25,7 +25,7 @@ public class UniqueDirectedEdge<V extends Vertex> extends DirectedEdge<V> {
         if (this == other) {
             return true;
         }
-        if (other.getClass() != UniqueDirectedEdge.class) {
+        if (other == null || other.getClass() != UniqueDirectedEdge.class) {
             return false;
         }
         UniqueDirectedEdge edge = (UniqueDirectedEdge) other;
