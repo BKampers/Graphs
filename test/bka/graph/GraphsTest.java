@@ -183,15 +183,6 @@ public class GraphsTest {
     }
 
 
-    @Test
-    public void testFindOrigin() {
-        Vertex typed = new TypedVertex();
-        Graph graph = new Graph(Arrays.asList(typed), Arrays.asList(D12));
-        graph.add(new DirectedEdge(typed, V2));
-        assertEquals(typed, graph.findOrigin(V2, TypedVertex.class));
-    }
-
-
     private static void assertContainsExactly(Collection collection, Object... elements) {
         assertEquals(elements.length, collection.size());
         assertTrue(collection.containsAll(Arrays.asList(elements)));

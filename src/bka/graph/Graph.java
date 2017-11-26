@@ -95,17 +95,6 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    @Deprecated
-    public V findOrigin(V vertex, Class<? extends Vertex> originClass) {
-        for (E edge : allDirectedEdgesTo(vertex)) {
-            if (edge.getOrigin().getClass() == originClass) {
-                return edge.getOrigin();
-            }
-        }
-        return null;
-    }
-    
-    
     public Set<V> getVertices() {
         return Collections.unmodifiableSet(vertices);
     }
