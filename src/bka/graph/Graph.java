@@ -50,26 +50,17 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public final boolean add(V vertex) {
-        if (vertex == null) {
-            throw new IllegalArgumentException();
-        }
-        if (vertices.contains(vertex)) {
-            return false;
-        }
-        return vertices.add(vertex);
+        return vertices.add(Objects.requireNonNull(vertex));
     }
 
 
     public final boolean add(E edge) {
-        if (edge == null) {
-            throw new IllegalArgumentException();
+        boolean added = edges.add(Objects.requireNonNull(edge));
+        if (added) {
+            add(edge.getOrigin());
+            add(edge.getTerminus());
         }
-        if (edges.contains(edge)) {
-            return false;
-        }
-        add(edge.getOrigin());
-        add(edge.getTerminus());
-        return edges.add(edge);
+        return added;
     }
 
 
@@ -104,6 +95,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
+    @Deprecated
     public V findOrigin(V vertex, Class<? extends Vertex> originClass) {
         for (E edge : allDirectedEdgesTo(vertex)) {
             if (edge.getOrigin().getClass() == originClass) {
@@ -114,13 +106,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
     
     
-    public Collection<V> getVertices() {
-        return Collections.unmodifiableCollection(vertices);
+    public Set<V> getVertices() {
+        return Collections.unmodifiableSet(vertices);
     }
     
     
-    public Collection<E> getEdges() {
-        return Collections.unmodifiableCollection(edges);
+    public Set<E> getEdges() {
+        return Collections.unmodifiableSet(edges);
     }
     
     
@@ -164,26 +156,48 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public Collection<E> allDirectedEdgesFrom(V vertex) {
+    public Set<E> allDirectedEdgesFrom(V vertex) {
         return allEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
     }
     
     
-    public Collection<E> allDirectedEdgesTo(V vertex) {
+    public Set<E> allDirectedEdgesTo(V vertex) {
         return allEdges((E edge) -> edge.isDirected() && edge.getTerminus() == vertex);
     }
 
 
-    public Collection<E> allDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
+    public Set<E> allDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
         return allEdges((E edge) -> edge.getClass() == edgeClass);
     }
 
 
-    public Collection<E> allUndirectedEdgesFrom(V vertex) {
+    public Set<E> allUndirectedEdgesFrom(V vertex) {
         return allEdges((E edge) -> ! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex));
     }
     
     
+    public Set<V> allVertices(Predicate<V> predicate) {
+        Set<V> all = new HashSet<>();
+        for (V vertex : vertices) {
+            if (predicate.test(vertex)) {
+                all.add(vertex);
+            }
+        }
+        return all;
+    }
+
+
+    public Set<E> allEdges(Predicate<E> predicate) {
+        Set<E> all = new HashSet<>();
+        for (E edge : edges) {
+            if (predicate.test(edge)) {
+                all.add(edge);
+            }
+        }
+        return all;
+    }
+
+
     public Graph<V, E> directedGraphFrom(V seed) {
         Graph<V, E> graph = new Graph<>();
         findDirectedGraphFrom(seed, graph);
@@ -229,29 +243,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public Collection<V> allVertices(Predicate<V> predicate) {
-        Collection<V> all = new ArrayList<>();
-        for (V vertex : vertices) {
-            if (predicate.test(vertex)) {
-                all.add(vertex);
-            }
-        }
-        return all;
-    }
-
-
-    public Collection<E> allEdges(Predicate<E> predicate) {
-        Collection<E> all = new ArrayList<>();
-        for (E edge : edges) {
-            if (predicate.test(edge)) {
-                all.add(edge);
-            }
-        }
-        return all;
-    }
-
-
-    private final Collection<V> vertices = new ArrayList<>();
-    private final Collection<E> edges = new ArrayList<>();
+    private final Set<V> vertices = new HashSet<>();
+    private final Set<E> edges = new HashSet<>();
 
 }
