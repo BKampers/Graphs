@@ -141,63 +141,79 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public boolean isLeaf(V vertex) {
-        return allDirectedEdgesFrom(vertex).isEmpty();
+        return getDirectedEdgesFrom(vertex).isEmpty();
     }
 
-
-    public Set<E> allDirectedEdgesFrom(V vertex) {
-        return allEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
-    }
     
-    
-    public Set<E> allDirectedEdgesTo(V vertex) {
-        return allEdges((E edge) -> edge.isDirected() && edge.getTerminus() == vertex);
-    }
-
-
-    public Set<E> allDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
-        return allEdges((E edge) -> edge.getClass() == edgeClass);
-    }
-
-
-    public Set<E> allUndirectedEdgesFrom(V vertex) {
-        return allEdges((E edge) -> ! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex));
-    }
-    
-    
-    public Set<V> allVertices(Predicate<V> predicate) {
-        Set<V> all = new HashSet<>();
+    public V getVertex(Predicate<V> predicate) {
         for (V vertex : vertices) {
             if (predicate.test(vertex)) {
-                all.add(vertex);
+                return vertex;
             }
         }
-        return all;
+        return null;
+    }
+
+    
+    public Set<E> getDirectedEdgesFrom(V vertex) {
+        return getEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
+    }
+    
+    
+    public Set<E> getDirectedEdgesTo(V vertex) {
+        return getEdges((E edge) -> edge.isDirected() && edge.getTerminus() == vertex);
     }
 
 
-    public Set<E> allEdges(Predicate<E> predicate) {
-        Set<E> all = new HashSet<>();
+    public Set<E> getDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
+        return getEdges((E edge) -> edge.getClass() == edgeClass);
+    }
+
+
+    public Set<E> getUndirectedEdgesFrom(V vertex) {
+        return getEdges((E edge) -> ! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex));
+    }
+    
+    
+    public Set<V> getVertices(Predicate<V> predicate) {
+        Set<V> set = new HashSet<>();
+        for (V vertex : vertices) {
+            if (predicate.test(vertex)) {
+                set.add(vertex);
+            }
+        }
+        return set;
+    }
+
+
+    public Set<E> getEdges(Predicate<E> predicate) {
+        Set<E> set = new HashSet<>();
         for (E edge : edges) {
             if (predicate.test(edge)) {
-                all.add(edge);
+                set.add(edge);
             }
         }
-        return all;
+        return set;
     }
 
 
-    public Graph<V, E> directedGraphFrom(V seed) {
+    public Graph<V, E> getDirectedGraphFrom(V seed) {
         Graph<V, E> graph = new Graph<>();
         findDirectedGraphFrom(seed, graph);
         return graph;
     }
 
 
-    public List<V> directedWalk(V start, V end) {
+    public List<V> getDirectedWalk(V start, V end) {
         List<V> walk = new ArrayList<>();
         findDirectedWalk(walk, start, end);
         return walk;
+    }
+    
+    
+    @Override
+    public String toString() {
+        return "Vertices: " + vertices.size() + " , edges: " + edges.size();
     }
 
 
@@ -206,7 +222,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
             walk.add(start);
             boolean found = start == end;
             if (! found) {
-                Iterator<E> leavingEdges = allDirectedEdgesFrom(start).iterator();
+                Iterator<E> leavingEdges = getDirectedEdgesFrom(start).iterator();
                 while (! found && leavingEdges.hasNext()) {
                     E nextEdge = leavingEdges.next();
                     findDirectedWalk(walk, nextEdge.getTerminus(), end);
@@ -221,7 +237,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     private void findDirectedGraphFrom(V seed, Graph<V, E> graph) {
-        for (E edge : allDirectedEdgesFrom(seed)) {
+        for (E edge : getDirectedEdgesFrom(seed)) {
             V terminus = edge.getTerminus();
             boolean searchTerminus = ! graph.contains(terminus);
             graph.add(edge);

@@ -143,25 +143,25 @@ public class GraphsTest {
 
 
     @Test
-    public void testAllUndirectedEdgesFrom() {
+    public void testGetUndirectedEdgesFrom() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
-        Collection<Edge> edges = graph.allUndirectedEdgesFrom(V0);
+        Collection<Edge> edges = graph.getUndirectedEdgesFrom(V0);
         assertContainsExactly(edges, U01, U02, U03);
     }
 
 
     @Test
-    public void testAllDirectedEdgesFrom() {
+    public void testGetDirectedEdgesFrom() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
-        Collection<Edge> edges = graph.allDirectedEdgesFrom(V0);
+        Collection<Edge> edges = graph.getDirectedEdgesFrom(V0);
         assertContainsExactly(edges, D01, D02, D03);
     }
 
 
     @Test
-    public void testAllDirectedEdgesTo() {
+    public void testGetDirectedEdgesTo() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
-        Collection<Edge> edges = graph.allDirectedEdgesTo(V1);
+        Collection<Edge> edges = graph.getDirectedEdgesTo(V1);
         assertContainsExactly(edges, D01, D31);
     }
 
@@ -169,7 +169,7 @@ public class GraphsTest {
     @Test
     public void testDirectedWalk() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
-        List<Vertex> walk = graph.directedWalk(V1, V3);
+        List<Vertex> walk = graph.getDirectedWalk(V1, V3);
         assertContainsExactly(walk, V1, V2, V3);
     }
 
@@ -177,7 +177,7 @@ public class GraphsTest {
     @Test
     public void testDirectedGraphFrom() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
-        Graph directedGraph = graph.directedGraphFrom(V1);
+        Graph directedGraph = graph.getDirectedGraphFrom(V1);
         Collection<Edge> edges = directedGraph.getEdges();
         assertContainsExactly(edges, D12, D23, D31);
     }
@@ -187,9 +187,6 @@ public class GraphsTest {
         assertEquals(elements.length, collection.size());
         assertTrue(collection.containsAll(Arrays.asList(elements)));
     }
-
-
-    private class TypedVertex extends Vertex {}
 
 
     private static final Vertex V0 = new Vertex();
