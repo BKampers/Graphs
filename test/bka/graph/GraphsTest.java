@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 
 public class GraphsTest {
@@ -156,6 +157,19 @@ public class GraphsTest {
         Collection<Edge> edges = graph.getDirectedEdgesFrom(V0);
         assertContainsExactly(edges, D01, D02, D03);
     }
+    
+    
+    @Test
+    public void testGetVertex() {
+        Vertex a = Mockito.mock(Vertex.class);
+        Mockito.when(a.getName()).thenReturn("a");
+        Vertex b = Mockito.mock(Vertex.class);
+        Mockito.when(b.getName()).thenReturn("b");
+        Vertex c = Mockito.mock(Vertex.class);
+        Mockito.when(c.getName()).thenReturn("c");
+        Graph<Vertex, Edge<Vertex>> graph = new Graph(Arrays.asList(a, b, c), Collections.EMPTY_LIST);
+        assertEquals(a, graph.getVertex((Vertex vertex) -> "a".equals(vertex.getName())));
+    }
 
 
     @Test
@@ -167,7 +181,7 @@ public class GraphsTest {
 
 
     @Test
-    public void testDirectedWalk() {
+    public void testGetDirectedWalk() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
         List<Vertex> walk = graph.getDirectedWalk(V1, V3);
         assertContainsExactly(walk, V1, V2, V3);
