@@ -29,7 +29,7 @@ public class UniqueDirectedEdge<V extends Vertex> extends DirectedEdge<V> {
             return false;
         }
         UniqueDirectedEdge edge = (UniqueDirectedEdge) other;
-        return edge.getOrigin() == getOrigin() && edge.getTerminus() == getTerminus();
+        return Objects.equals(edge.getOrigin(), getOrigin()) && Objects.equals(edge.getTerminus(), getTerminus());
     }
 
 
