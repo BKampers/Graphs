@@ -50,7 +50,11 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public final boolean add(V vertex) {
-        return vertices.add(Objects.requireNonNull(vertex));
+        if (contains(Objects.requireNonNull(vertex))) {
+            return false;
+        }
+        vertices.add(vertex);
+        return true;
     }
 
 
@@ -95,18 +99,23 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public Set<V> getVertices() {
-        return Collections.unmodifiableSet(vertices);
+    public Collection<V> getVertices() {
+        return Collections.unmodifiableCollection(vertices);
     }
     
     
-    public Set<E> getEdges() {
-        return Collections.unmodifiableSet(edges);
+    public Collection<E> getEdges() {
+        return Collections.unmodifiableCollection(edges);
     }
     
     
     public boolean contains(V vertex) {
-        return vertices.contains(vertex);
+        for (V v : vertices) {
+            if (v == vertex) {
+                return true;
+            }
+        }
+        return false;
     }
     
     
@@ -217,7 +226,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-     private void findDirectedWalk(List<V> walk, V start, V end) {
+    private void findDirectedWalk(List<V> walk, V start, V end) {
         if (! walk.contains(start)) {
             walk.add(start);
             boolean found = start == end;
@@ -248,7 +257,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    private final Set<V> vertices = new HashSet<>();
-    private final Set<E> edges = new HashSet<>();
+    private final Collection<V> vertices = new ArrayList<>();
+    private final Collection<E> edges = new HashSet<>();
 
 }
