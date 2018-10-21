@@ -175,7 +175,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public Set<E> getDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
-        return getEdges((E edge) -> edge.getClass() == edgeClass);
+        return getEdges((E edge) -> edge.getClass() == edgeClass && edge.isDirected() && edge.getTerminus() == vertex);
     }
 
 
