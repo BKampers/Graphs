@@ -111,7 +111,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     public boolean contains(V vertex) {
         for (V v : vertices) {
-            if (v == vertex) {
+            if (v.equals(vertex)) {
                 return true;
             }
         }
@@ -165,22 +165,22 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
     
     public Set<E> getDirectedEdgesFrom(V vertex) {
-        return getEdges((E edge) -> edge.isDirected() && edge.getOrigin() == vertex);
+        return getEdges((E edge) -> edge.isDirected() && vertex.equals(edge.getOrigin()));
     }
     
     
     public Set<E> getDirectedEdgesTo(V vertex) {
-        return getEdges((E edge) -> edge.isDirected() && edge.getTerminus() == vertex);
+        return getEdges((E edge) -> edge.isDirected() && vertex.equals(edge.getTerminus()));
     }
 
 
     public Set<E> getDirectedEdgesTo(V vertex, Class<? extends DirectedEdge> edgeClass) {
-        return getEdges((E edge) -> edge.getClass() == edgeClass && edge.isDirected() && edge.getTerminus() == vertex);
+        return getEdges((E edge) -> edge.getClass() == edgeClass && edge.isDirected() && vertex.equals(edge.getTerminus()));
     }
 
 
     public Set<E> getUndirectedEdgesFrom(V vertex) {
-        return getEdges((E edge) -> ! edge.isDirected() && (edge.getOrigin() == vertex || edge.getTerminus() == vertex));
+        return getEdges((E edge) -> ! edge.isDirected() && (vertex.equals(edge.getOrigin()) || vertex.equals(edge.getTerminus())));
     }
     
     
@@ -229,7 +229,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     private void findDirectedWalk(List<V> walk, V start, V end) {
         if (! walk.contains(start)) {
             walk.add(start);
-            boolean found = start == end;
+            boolean found = start.equals(end);
             if (! found) {
                 Iterator<E> leavingEdges = getDirectedEdgesFrom(start).iterator();
                 while (! found && leavingEdges.hasNext()) {
@@ -257,7 +257,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    private final Collection<V> vertices = new ArrayList<>();
+    private final Collection<V> vertices = new HashSet<>();
     private final Collection<E> edges = new HashSet<>();
 
 }
