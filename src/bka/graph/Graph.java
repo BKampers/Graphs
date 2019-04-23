@@ -110,12 +110,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     
     public boolean contains(V vertex) {
-        for (V v : vertices) {
-            if (v.equals(vertex)) {
-                return true;
-            }
-        }
-        return false;
+        return vertices.contains(vertex);
     }
     
     
