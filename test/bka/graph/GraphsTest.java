@@ -8,8 +8,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.*;
+import org.mockito.*;
 
 
 public class GraphsTest {
@@ -37,14 +37,14 @@ public class GraphsTest {
     }
     
     
-    @Test(expected=RuntimeException.class)
+    @Test (expected = RuntimeException.class)
     public void testAddNullVertex() {
         Graph graph = new Graph();
         graph.add((Vertex) null);
     }
     
     
-    @Test(expected=RuntimeException.class)
+    @Test (expected = RuntimeException.class)
     public void testAddNullEdge() {
         Graph graph = new Graph();
         graph.add((Edge) null);
@@ -82,6 +82,15 @@ public class GraphsTest {
         assertContainsExactly(graph.getEdges(), D12, D23);
         graph.addEdges(Arrays.asList(D23, D31));
         assertContainsExactly(graph.getEdges(), D12, D23, D31);
+    }
+    
+    
+    @Test
+    public void testAddGraph() {
+        Graph graph = new Graph(Arrays.asList(D01, D02));
+        graph.add(new Graph(Arrays.asList(V3), Arrays.asList(D12)));
+        assertContainsExactly(graph.getVertices(), V0, V1, V2, V3);
+        assertContainsExactly(graph.getEdges(), D01, D02, D12);
     }
     
     
@@ -194,6 +203,24 @@ public class GraphsTest {
         Graph directedGraph = graph.getDirectedGraphFrom(V1);
         Collection<Edge> edges = directedGraph.getEdges();
         assertContainsExactly(edges, D12, D23, D31);
+    }
+    
+    
+    @Test
+    public void getVertices() {
+        Graph graph = new Graph(Arrays.asList(U01, U02));
+        assertContainsExactly(graph.getVertices(), V0, V1, V2);
+        Set selection = graph.getVertices(v -> v == V1 || v == V2);
+        assertContainsExactly(selection, V1, V2);
+    }
+    
+    
+    @Test
+    public void getEdges() {
+        Graph graph = new Graph(Arrays.asList(U01, U02, U03));
+        assertContainsExactly(graph.getEdges(), U01, U02, U03);
+        Set selection = graph.getEdges(e -> e == U01 || e == U02);
+        assertContainsExactly(selection, U01, U02);
     }
 
 

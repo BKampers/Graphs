@@ -50,11 +50,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
 
     public final boolean add(V vertex) {
-        if (contains(Objects.requireNonNull(vertex))) {
-            return false;
-        }
-        vertices.add(vertex);
-        return true;
+        return vertices.add(Objects.requireNonNull(vertex));
     }
 
 
@@ -68,13 +64,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public void add(Graph graph) {
+    public final void add(Graph graph) {
         addEdges(graph.edges);
         addVertices(graph.vertices);
     }
     
     
-    public boolean remove(V vertex) {
+    public final boolean remove(V vertex) {
         boolean removed = vertices.remove(vertex);
         if (removed) {
             Iterator<E> it = edges.iterator();
@@ -89,7 +85,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    public boolean remove(E edge) {
+    public final boolean remove(E edge) {
         return edges.remove(edge);
     }
 
@@ -252,7 +248,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    private final Collection<V> vertices = new HashSet<>();
-    private final Collection<E> edges = new HashSet<>();
+    private final Set<V> vertices = new HashSet<>();
+    private final Set<E> edges = new HashSet<>();
 
 }
