@@ -88,6 +88,12 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public final boolean remove(E edge) {
         return edges.remove(edge);
     }
+    
+    
+    public void clear() {
+        edges.clear();
+        vertices.clear();
+    }
 
 
     public boolean isEmpty() {
