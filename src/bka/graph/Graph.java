@@ -205,7 +205,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
 
     public Graph<V, E> getDirectedGraphFrom(V seed) {
         Graph<V, E> graph = new Graph<>();
-        findDirectedGraphFrom(seed, graph);
+        graph.add(seed);
+        buildDirectedGraphFrom(seed, graph);
         return graph;
     }
 
@@ -219,7 +220,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     
     @Override
     public String toString() {
-        return "Vertices: " + vertices.size() + " , edges: " + edges.size();
+        return "Vertices: " + vertices.size() + ", edges: " + edges.size();
     }
 
 
@@ -242,13 +243,13 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     }
 
 
-    private void findDirectedGraphFrom(V seed, Graph<V, E> graph) {
+    private void buildDirectedGraphFrom(V seed, Graph<V, E> graph) {
         for (E edge : getDirectedEdgesFrom(seed)) {
             V terminus = edge.getTerminus();
-            boolean searchTerminus = ! graph.contains(terminus);
+            boolean containsTerminus = ! graph.contains(terminus);
             graph.add(edge);
-            if (searchTerminus) {
-                findDirectedGraphFrom(terminus, graph);
+            if (containsTerminus) {
+                buildDirectedGraphFrom(terminus, graph);
             }
         }
     }

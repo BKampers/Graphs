@@ -133,6 +133,7 @@ public class GraphsTest {
         assertTrue(new Graph(Arrays.asList(D01, D02)).isDirected());
         assertFalse(new Graph(Arrays.asList(U01, U02)).isDirected());
         assertFalse(new Graph(Arrays.asList(D01, U02)).isDirected());
+        assertTrue(new Graph().isDirected());
     }
 
 
@@ -141,6 +142,7 @@ public class GraphsTest {
         assertFalse(new Graph(Arrays.asList(D01, D02)).isUndirected());
         assertTrue(new Graph(Arrays.asList(U01, U02)).isUndirected());
         assertFalse(new Graph(Arrays.asList(D01, U02)).isUndirected());
+        assertTrue(new Graph().isUndirected());
     }
 
 
@@ -149,6 +151,7 @@ public class GraphsTest {
         assertFalse(new Graph(Arrays.asList(D01, D02)).isMixed());
         assertFalse(new Graph(Arrays.asList(U01, U02)).isMixed());
         assertTrue(new Graph(Arrays.asList(D01, U02)).isMixed());
+        assertFalse(new Graph().isMixed());
     }
 
 
@@ -201,8 +204,11 @@ public class GraphsTest {
     public void testDirectedGraphFrom() {
         Graph graph = new Graph(Arrays.asList(U01, U02, U03, U12, U23, U31, D01, D02, D03, D12, D23, D31));
         Graph directedGraph = graph.getDirectedGraphFrom(V1);
-        Collection<Edge> edges = directedGraph.getEdges();
-        assertContainsExactly(edges, D12, D23, D31);
+        assertContainsExactly(directedGraph.getEdges(), D12, D23, D31);
+        graph = new Graph(Arrays.asList(V0), Arrays.asList(U12));
+        directedGraph = graph.getDirectedGraphFrom(V0);
+        assertTrue(directedGraph.getEdges().isEmpty());
+        assertContainsExactly(directedGraph.getVertices(), V0);
     }
     
     
