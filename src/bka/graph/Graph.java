@@ -27,8 +27,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public Graph(Collection<E> edges) {
         addEdges(edges);
     }
-    
-    
+
+
     public Graph(Collection<V> vertices, Collection<E> edges) {
         addEdges(edges);
         addVertices(vertices);
@@ -68,8 +68,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         addEdges(graph.edges);
         addVertices(graph.vertices);
     }
-    
-    
+
+
     public final boolean remove(V vertex) {
         boolean removed = vertices.remove(vertex);
         if (removed) {
@@ -88,8 +88,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public final boolean remove(E edge) {
         return edges.remove(edge);
     }
-    
-    
+
+
     public void clear() {
         edges.clear();
         vertices.clear();
@@ -104,23 +104,33 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public Collection<V> getVertices() {
         return Collections.unmodifiableCollection(vertices);
     }
-    
-    
+
+
+    public int vertexCount() {
+        return vertices.size();
+    }
+
+
     public Collection<E> getEdges() {
         return Collections.unmodifiableCollection(edges);
     }
-    
-    
+
+
+    public int edgeCount() {
+        return edges.size();
+    }
+
+
     public boolean contains(V vertex) {
         return vertices.contains(vertex);
     }
-    
-    
+
+
     public boolean contains(E edge) {
         return edges.contains(edge);
     }
-    
-    
+
+
     public boolean isDirected() {
         for (E edge : edges) {
             if (! edge.isDirected()) {
@@ -129,8 +139,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         }
         return true;
     }
-    
-    
+
+
     public boolean isUndirected() {
         for (E edge : edges) {
             if (edge.isDirected()) {
@@ -139,10 +149,15 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         }
         return true;
     }
-    
-    
+
+
     public boolean isMixed() {
         return ! (isDirected() || isUndirected());
+    }
+
+
+    public boolean isRoot(V vertex) {
+        return getDirectedEdgesTo(vertex).isEmpty();
     }
 
 
@@ -150,7 +165,7 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         return getDirectedEdgesFrom(vertex).isEmpty();
     }
 
-    
+
     public V getVertex(Predicate<V> predicate) {
         for (V vertex : vertices) {
             if (predicate.test(vertex)) {
@@ -160,12 +175,12 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         return null;
     }
 
-    
+
     public Set<E> getDirectedEdgesFrom(V vertex) {
         return getEdges((E edge) -> edge.isDirected() && vertex.equals(edge.getOrigin()));
     }
-    
-    
+
+
     public Set<E> getDirectedEdgesTo(V vertex) {
         return getEdges((E edge) -> edge.isDirected() && vertex.equals(edge.getTerminus()));
     }
@@ -179,8 +194,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
     public Set<E> getUndirectedEdgesFrom(V vertex) {
         return getEdges((E edge) -> ! edge.isDirected() && (vertex.equals(edge.getOrigin()) || vertex.equals(edge.getTerminus())));
     }
-    
-    
+
+
     public Set<V> getVertices(Predicate<V> predicate) {
         Set<V> set = new HashSet<>();
         for (V vertex : vertices) {
@@ -216,8 +231,8 @@ public class Graph<V extends Vertex, E extends Edge<V>> {
         findDirectedWalk(walk, start, end);
         return walk;
     }
-    
-    
+
+
     @Override
     public String toString() {
         return "Vertices: " + vertices.size() + ", edges: " + edges.size();
