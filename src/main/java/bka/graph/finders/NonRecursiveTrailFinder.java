@@ -8,6 +8,7 @@ import bka.graph.*;
 import bka.graph.utils.*;
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
 
 public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrailFinder<V, E> {
@@ -30,7 +31,7 @@ public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrail
     public Collection<List<E>> find(Collection<E> graph, V start, V end, boolean revisitVertices) {
         Collection<List<E>> foundTrails = new ArrayList<>();
         Deque<SearchStage> stack = new LinkedList<>();
-        SearchStage stage = new SearchStage(graph, start);
+        SearchStage stage = new SearchStage(relevantEdges(revisitVertices, graph, start), start);
         for (;;) {
             if (stage.selectNextEdge()) {
                 V nextVertex = stage.getAdjacentVertex();
@@ -44,7 +45,7 @@ public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrail
                     }
                     if (revisitVertices || !nextVertex.equals(end)) {
                         stack.push(stage);
-                        stage = stage.createComplement(revisitVertices || isFirstLoop(stack, start, end), nextVertex);
+                        stage = stage.createComplement(revisitVertices || isFirstInCircuit(stack, start, end), nextVertex);
                     }
                 }
             }
@@ -56,8 +57,16 @@ public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrail
             }
         }
     }
+
+    private Collection<E> relevantEdges(boolean revisitVertices, Collection<E> graph, V start) {
+        return (revisitVertices) ? graph : graph.stream().filter(relevant(start)).collect(Collectors.toList());
+    }
+
+    private Predicate<E> relevant(V start) {
+        return edge -> !EdgeUtil.isLoop(edge) || edge.getVertices().contains(start);
+    }
     
-    private boolean isFirstLoop(Deque stack, V start, V end) {
+    private boolean isFirstInCircuit(Deque stack, V start, V end) {
         return stack.size() == 1 && start.equals(end);
     }
 

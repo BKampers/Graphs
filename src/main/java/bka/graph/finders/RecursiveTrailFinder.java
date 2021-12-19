@@ -8,6 +8,7 @@ import bka.graph.*;
 import bka.graph.utils.*;
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
 
 public class RecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrailFinder<V, E> {
@@ -24,6 +25,10 @@ public class RecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrailFin
 
     @Override
     public Collection<List<E>> find(Collection<E> graph, V start, V end, boolean revisitVertices) {
+        if (!revisitVertices) {
+            Collection<E> noLoops = graph.stream().filter(edge -> !EdgeUtil.isLoop(edge) || edge.getVertices().contains(start)).collect(Collectors.toList());
+            return find(noLoops, start, end, revisitVertices, new LinkedList<>());
+        }
         return find(graph, start, end, revisitVertices, new LinkedList<>());
     }
 
@@ -39,7 +44,7 @@ public class RecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrailFin
                     allTrails.add(trail);
                 }
                 if (revisitVertices || !nextVertex.equals(end)) {
-                    Collection<E> remainingEdges = (revisitVertices || isFirstLoop(currentTrail, start, end)) ? complement(graph, nextEdge) : complement(graph, start);
+                    Collection<E> remainingEdges = (revisitVertices || start.equals(end)) ? complement(graph, nextEdge) : complement(graph, start);
                     find(remainingEdges, nextVertex, end, revisitVertices, currentTrail).forEach(trail -> {
                         trail.add(0, nextEdge);
                         allTrails.add(trail);
@@ -57,10 +62,6 @@ public class RecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrailFin
 
     protected V next(E edge, V start) {
         return EdgeUtil.getAdjacentVertex(edge, start);
-    }
-
-    private static boolean isFirstLoop(LinkedList currentTrail, Object start, Object end) {
-        return currentTrail.size() == 1 && start.equals(end);
     }
 
     private Predicate<List<E>> restriction;
