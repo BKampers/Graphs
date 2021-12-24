@@ -15,23 +15,18 @@ import org.junit.jupiter.api.*;
 @SuppressWarnings("unchecked")
 public class TrailFinderTest {
 
-    private GraphExplorer[] explorers;
-
-    @BeforeEach
-    public void init() {
-        explorers = new GraphExplorer[] {
-            new GraphExplorer<>(new NonRecursiveTrailFinder<>()),
-            new GraphExplorer<>(new RecursiveTrailFinder<>())
-        };
+    @BeforeAll
+    public static void setup() {
+        Locale.setDefault(Locale.ENGLISH); // Decimal points instead of commas in printouts
     }
 
     @Test
     public void testFilters() {
-        for (TrailFinder finder : new TrailFinder[]{new NonRecursiveTrailFinder(), new RecursiveTrailFinder()}) {
-            long startTime = System.currentTimeMillis();
+        for (TrailFinder finder : getTrailFinders()) {
+            long startTime = System.nanoTime();
             testFilters(finder);
-            long duration = System.currentTimeMillis() - startTime;
-            System.out.println(finder.getClass().getSimpleName() + ": " + duration);
+            long duration = System.nanoTime() - startTime;
+            System.out.printf("Class %s tested in %.3f ms\n", finder.getClass().getSimpleName(), duration / 1000000.0);
         }
     }
 
@@ -122,7 +117,7 @@ public class TrailFinderTest {
 
     @Test
     public void testFindAllEmpty() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             testFindAllEmpty(explorer);
         }
     }
@@ -142,7 +137,7 @@ public class TrailFinderTest {
 
     @Test
     public void testFindAllComplex() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             testFindAllComplex(explorer);
         }
     }
@@ -212,7 +207,7 @@ public class TrailFinderTest {
 
     @Test
     public void testFindAllShort() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             testFindAllShort(explorer);
         }
     }
@@ -266,7 +261,7 @@ public class TrailFinderTest {
 
     @Test
     public void testFindAllDoubleLoop() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             testFindAllDoubleLoop(explorer);
         }
     }
@@ -304,7 +299,7 @@ public class TrailFinderTest {
 
     @Test
     public void findAllMultyLoop() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             findAllMultyLoop(explorer);
         }
     }
@@ -335,7 +330,7 @@ public class TrailFinderTest {
 
     @Test
     public void findAllDoubleLoop() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             findAllDoubleLoop(explorer);
         }
     }
@@ -396,7 +391,7 @@ public class TrailFinderTest {
 
     @Test
     public void testFindAllFrom() {
-        for (GraphExplorer<String, Edge<String>> explorer : explorers) {
+        for (GraphExplorer<String, Edge<String>> explorer : getExplorers()) {
             testFindAllFrom(explorer);
         }
     }
@@ -460,8 +455,10 @@ public class TrailFinderTest {
 
     @Test
     public void testCompleteGraph() {
-        for (GraphExplorer<Integer, Edge<Integer>> explorer : explorers) {
+        for (GraphExplorer<Integer, Edge<Integer>> explorer : getExplorers()) {
+            System.out.println(explorer.toString());
             testCompleteGraph(explorer);
+            System.out.println("==========");
         }
     }
 
@@ -474,11 +471,11 @@ public class TrailFinderTest {
             ArrayList<Integer> vertices = new ArrayList<>(graph.getVertices());
             Integer v2 = vertices.size() + 1;
             vertices.forEach(v1 -> graph.addEdge(new UndirectedEdge<>(v1, v2)));
-            long startTime = System.currentTimeMillis();
+            long startTime = System.nanoTime();
             Collection<List<Edge<Integer>>> trails = explorer.findAllPaths(graph, 1, null);
-            long duration = System.currentTimeMillis() - startTime;
-            System.out.println(v2.toString() + ": " + trails.size());
-            System.out.println("Duration: " + duration + " ms");
+            long duration = System.nanoTime() - startTime;
+            System.out.printf("%d vertices: %d trails\n", v2, trails.size());
+            System.out.printf("Duration: %.3f ms\n", duration / 1000000.0);
             done = v2.equals(9);
         }
     }
@@ -548,6 +545,22 @@ public class TrailFinderTest {
         return true;
     }
 
+    private static GraphExplorer[] getExplorers() {
+        TrailFinder[] trailFinders = getTrailFinders();
+        GraphExplorer[] explorers = new GraphExplorer[trailFinders.length];
+        for (int i = 0; i < trailFinders.length; ++i) {
+            explorers[i] = new GraphExplorer(trailFinders[i]);
+        }
+        return explorers;
+    }
+
+    private static TrailFinder[] getTrailFinders() {
+        return new TrailFinder[]{
+            new NonRecursiveTrailFinder(),
+            new RecursiveTrailFinder() };
+    }
+//    private TrailFinder[] trailFinders;
+//    private GraphExplorer[] explorers;
 
     private static final String[] AA = { "a", "a" };
     private static final String[] AB = { "a", "b" };
@@ -560,7 +573,7 @@ public class TrailFinderTest {
     private static final String[] CA = { "c", "a" };
     private static final String[] CC = { "c", "c" };
     private static final String[] CD = { "c", "d" };
-    private static final String[] CE = {"c", "e"};
+    private static final String[] CE = { "c", "e" };
     private static final String[] DE = { "d", "e" };
     private static final String[] EE = { "e", "e" };
 

@@ -76,18 +76,18 @@ public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrail
 
     private class TrailBuilder {
 
-        TrailBuilder(Deque<SearchStage> stack, SearchStage stage) {
+        public TrailBuilder(Deque<SearchStage> stack, SearchStage stage) {
             this.stack = stack;
             this.stage = stage;
         }
 
-        List<E> get() {
+        public List<E> get() {
             if (trail == null) {
                 trail = new ArrayList<>(stack.size() + 1);
                 for (Iterator<SearchStage> it = stack.descendingIterator(); it.hasNext();) {
-                    trail.add(it.next().current);
+                    trail.add(it.next().getCurrent());
                 }
-                trail.add(stage.current);
+                trail.add(stage.getCurrent());
             }
             return trail;
         }
@@ -121,6 +121,10 @@ public class NonRecursiveTrailFinder<V, E extends Edge<V>> extends AbstractTrail
 
         public V getAdjacentVertex() {
             return EdgeUtil.getAdjacentVertex(current, from);
+        }
+
+        public E getCurrent() {
+            return current;
         }
 
         private final Collection<E> subgraph;

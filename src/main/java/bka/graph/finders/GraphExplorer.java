@@ -91,6 +91,11 @@ public class GraphExplorer<V, E extends Edge<V>> {
         }
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + finder.getClass().getName() + '>';
+    }
+
     private final TrailFinder<V, E> finder;
 
 }
